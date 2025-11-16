@@ -1,0 +1,29 @@
+
+extends ../../layouts/default.pug
+include ../../mixins/box-head.pug
+include ../../mixins/product-layout.pug
+include ../../mixins/alert.pug
+
+block main
+  +alert-success(2000)
+  .container.my-3
+    .row
+      .col-12
+        +box-head("Outstanding Products")
+
+    .row
+      if products.length
+        +product-layout(products)
+      else
+        p.text-muted No products available.
+
+  .container.my-3
+    .row
+      .col-12
+        +box-head("New Products")
+
+    .row
+      if productsSorted.length
+        +product-layout(productsSorted)
+      else
+        p.text-muted No products available.
