@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import "../styles/BrandCarousel.css";
 
 const BrandCarousel = () => {
   const technologies = [
@@ -157,13 +156,24 @@ const BrandCarousel = () => {
   const duplicatedTech = [...technologies, ...technologies];
 
   return (
-    <div className="brand-carousel-container">
-      <h3 className="carousel-title">Technology Stack</h3>
-      <div className="brand-carousel" ref={scrollRef}>
-        <div className="brand-track">
+    <div className="flex h-full flex-col overflow-hidden rounded-md bg-[#f8f9fa] p-3 md:p-2">
+      <h3 className="mb-2 text-base font-semibold text-[#2c3e50] md:text-[0.9rem]">
+        Technology Stack
+      </h3>
+      <div
+        className="relative flex w-full flex-1 items-center overflow-x-hidden"
+        ref={scrollRef}
+      >
+        <div className="flex gap-3">
           {duplicatedTech.map((tech, index) => (
-            <div key={index} className="brand-item" title={tech.name}>
-              <div className="tech-icon">{tech.icon}</div>
+            <div
+              key={index}
+              className="flex min-w-[90px] items-center justify-center rounded-md border border-[#e0e0e0] bg-white px-4 py-2 shadow-[0_2px_4px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#667eea] hover:shadow-[0_4px_8px_rgba(102,126,234,0.2)] md:min-w-20 md:px-4 md:py-2"
+              title={tech.name}
+            >
+              <div className="flex items-center justify-center grayscale transition-[filter] duration-300 hover:grayscale-0">
+                {tech.icon}
+              </div>
             </div>
           ))}
         </div>

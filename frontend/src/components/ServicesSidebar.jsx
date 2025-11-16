@@ -1,11 +1,8 @@
 import React from "react";
-import "../styles/ServicesSidebar.css";
 
 const ServicesSidebar = () => {
   return (
-    <aside className="services-sidebar">
-
-    </aside>
+    <aside className="flex h-full flex-col rounded-lg bg-white p-3 shadow-[0_1px_4px_rgba(0,0,0,0.1)]"></aside>
   );
 };
 
