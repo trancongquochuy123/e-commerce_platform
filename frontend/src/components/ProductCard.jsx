@@ -2,7 +2,7 @@ import React from "react";
 
 const ProductCard = ({ product }) => {
   return (
-    <div className="flex flex-col overflow-hidden rounded-[14px] transition-all duration-300 hover:translate-y-[-8px]">
+    <div className="flex flex-col overflow-hidden rounded-[14px] transition-all duration-300 hover:-translate-y-2">
       <div className="relative flex h-[230px] w-full items-center justify-center overflow-hidden rounded-[14px] after:pointer-events-none after:absolute after:top-0 after:left-0 after:h-full after:w-full after:bg-black/0 after:transition-colors after:duration-300 after:content-[''] hover:after:bg-black/10 md:h-[180px]">
         <img
           src={product.img || product.image}
