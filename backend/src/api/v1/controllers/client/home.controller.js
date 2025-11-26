@@ -1,49 +1,75 @@
 const Product = require('../../../../models/product.model.js');
 const { priceNewProduct } = require('../../../../utils/products.js');
+const ResponseFormatter = require('../../../../utils/response.js');
+const ApiError = require('../../../../utils/apiError.js');
 
-// [GET] /api/home
-module.exports.index = async (req, res) => {
+/**
+ * @desc    Get home page products (featured + latest)
+ * @route   GET /api/v1/home
+ * @access  Public
+ */
+const getHomeProducts = async (req, res, next) => {
     try {
-        // 1. Featured Products
-        const featuredProducts = await Product.find({
-            feature: '1',
+        // Base query conditions
+        const baseConditions = {
             deleted: false,
             status: 'active'
-        })
-            .populate('product_category_id', 'title')
-            .limit(8)
-            .exec();
+        };
 
-        const featuredProductsNew = priceNewProduct(featuredProducts);
+        // Parallel queries for better performance
+        const [featuredProducts, latestProducts] = await Promise.all([
+            // Featured products
+            Product.find({
+                ...baseConditions,
+                feature: '1'
+            })
+                .populate('product_category_id', 'title slug')
+                .select('-deleted -deletedBy -updatedBy -__v')
+                .sort({ position: 1, createdAt: -1 })
+                .limit(8)
+                .lean()
+                .exec(),
 
-        // 2. Products sorted by createdAt DESC
-        const products = await Product.find({
-            deleted: false,
-            status: 'active'
-        })
-            .populate('product_category_id', 'title')
-            .sort({ createdAt: 'desc' })
-            .limit(8)
-            .exec();
+            // Latest products
+            Product.find(baseConditions)
+                .populate('product_category_id', 'title slug')
+                .select('-deleted -deletedBy -updatedBy -__v')
+                .sort({ createdAt: -1 })
+                .limit(8)
+                .lean()
+                .exec()
+        ]);
 
-        const productsSortedNew = priceNewProduct(products);
+        // Calculate discounted prices
+        const featuredWithPrices = priceNewProduct(featuredProducts);
+        const latestWithPrices = priceNewProduct(latestProducts);
 
-        // 3. Response dạng API
-        res.status(200).json({
-            success: true,
-            message: "Home products fetched successfully",
-            data: {
-                featuredProducts: featuredProductsNew,
-                products: productsSortedNew
+        // Format response
+        const responseData = {
+            featured: {
+                title: 'Featured Products',
+                items: featuredWithPrices,
+                count: featuredWithPrices.length
+            },
+            latest: {
+                title: 'Latest Products',
+                items: latestWithPrices,
+                count: latestWithPrices.length
             }
-        });
+        };
 
-    } catch (err) {
-        console.error("Error fetching products:", err);
-        res.status(500).json({
-            success: false,
-            message: "Internal Server Error",
-            error: err.message
-        });
+        return ResponseFormatter.success(
+            res,
+            responseData,
+            'Home products retrieved successfully'
+        );
+
+    } catch (error) {
+        console.error('❌ Get home products error:', error);
+        next(new ApiError(500, 'Failed to fetch home products'));
     }
+};
+
+module.exports = {
+    getHomeProducts
 };

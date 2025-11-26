@@ -7,6 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
+const logger = require('./src/shared/logger.js');
 
 require('dotenv').config();
 
@@ -19,8 +20,7 @@ const systemConfig = require('./config/system.js');
 const apiV1Routes = require('./src/api/v1/routes/index.route.js');
 
 // Import middlewares
-const errorHandler = require('./src/api/v1/middlewares/errorHandler.middleware.js');
-const notFound = require('./src/api/v1/middlewares/notFound.middleware.js');
+const { errorHandler, notFound } = require('./src/api/v1/middlewares/errorHandler.middleware.js');
 
 // Connect to database
 database.connect();
@@ -110,32 +110,28 @@ app.use(errorHandler); // Global error handler - Must be last
 // START SERVER
 // ======================
 const server = app.listen(port, () => {
-    console.log('═══════════════════════════════════════');
-    console.log('🚀 Server Started Successfully!');
-    console.log('═══════════════════════════════════════');
-    console.log(`📍 Server: http://localhost:${port}`);
-    console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🔗 API v1: http://localhost:${port}/api/v1`);
-    console.log(`💚 Health Check: http://localhost:${port}/health`);
-    console.log('═══════════════════════════════════════');
+    logger.info('═══════════════════════════════════════');
+    logger.info('🚀 Server Started Successfully!');
+    logger.info(`📍 Server: http://localhost:${port}`);
+    logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`🔗 API v1: http://localhost:${port}/api/v1`);
+    logger.info(`💚 Health Check: http://localhost:${port}/health`);
+    logger.info('═══════════════════════════════════════');
 });
 
 // ======================
 // GRACEFUL SHUTDOWN
 // ======================
 const gracefulShutdown = (signal) => {
-    console.log(`\n${signal} signal received: closing HTTP server`);
+    logger.info(`${signal} signal received: closing HTTP server`);
     server.close(() => {
-        console.log('✅ HTTP server closed');
-        console.log('📦 Closing database connection...');
-        // Close database connection if needed
-        // mongoose.connection.close();
+        logger.info('✅ HTTP server closed');
+        logger.info('📦 Closing database connection...');
         process.exit(0);
     });
 
-    // Force close after 10s
     setTimeout(() => {
-        console.error('❌ Could not close connections in time, forcefully shutting down');
+        logger.error('❌ Could not close connections in time, forcefully shutting down');
         process.exit(1);
     }, 10000);
 };
@@ -145,18 +141,18 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-    console.error('❌ UNCAUGHT EXCEPTION! Shutting down...');
-    console.error(error.name, error.message);
+    logger.error('❌ UNCAUGHT EXCEPTION! Shutting down...');
+    logger.error(`${error.name}: ${error.message}`);
+    logger.error(error.stack);
     process.exit(1);
 });
 
+
+
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (error) => {
-    console.error('❌ UNHANDLED REJECTION! Shutting down...');
-    console.error(error);
-    server.close(() => {
-        process.exit(1);
-    });
+    logger.error('❌ UNHANDLED REJECTION! Shutting down...');
+    logger.error(error);
+    server.close(() => process.exit(1));
 });
-
 module.exports = app;

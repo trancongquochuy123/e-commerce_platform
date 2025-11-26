@@ -1,4 +1,4 @@
-// src/api/v1/routes/index.js
+// src/api/v1/routes/index.route.js
 const express = require('express');
 const router = express.Router();
 
@@ -7,33 +7,33 @@ const systemConfig = require('../../../../config/system.js');
 
 // Middlewares
 const adminAuth = require('../middlewares/admin/auth.middleware.js');
-const permission = require('../middlewares/admin/auth.middleware.js');
+const permission = require('../middlewares/admin/permission.middleware.js');
 
 // Sub routers
-// --- ADMIN ---
 const adminRoutes = require('./admin/index.route.js');
-// --- CLIENT ---
 const clientRoutes = require('./client/index.route.js');
 
-// Combine routes
-module.exports = (app) => {
-    /** -------------------------------------------------------
-     *  CLIENT ROUTES (Public)
-     * -------------------------------------------------------- */
-    app.use('/api/v1', clientRoutes);
+console.log('📦 Loading API v1 routes...');
 
+/** -------------------------------------------------------
+ *  CLIENT ROUTES (Public)
+ *  Mount at: /api/v1/*
+ * -------------------------------------------------------- */
+router.use('/', clientRoutes);
 
-    /** -------------------------------------------------------
-     *  ADMIN ROUTES (Private)
-     * -------------------------------------------------------- */
-    const PATH_ADMIN = systemConfig.prefixAdmin || '/admin';
+/** -------------------------------------------------------
+ *  ADMIN ROUTES (Private)
+ *  Mount at: /api/v1/admin/*
+ * -------------------------------------------------------- */
+const PATH_ADMIN = systemConfig.prefixAdmin || '/admin';
 
-    app.use(
-        `/api/v1${PATH_ADMIN}`,
-        adminAuth.requireAuth,     // Bắt buộc login
-        permission.checkRole,      // Kiểm tra quyền
-        adminRoutes                // Nhóm admin routes
-    );
+router.use(
+    PATH_ADMIN,
+    adminAuth.requireAuth,     // Bắt buộc login
+    permission.checkRole,      // Kiểm tra quyền
+    adminRoutes                // Nhóm admin routes
+);
 
-    return app;
-};
+console.log('✅ API v1 routes loaded successfully!');
+
+module.exports = router;
