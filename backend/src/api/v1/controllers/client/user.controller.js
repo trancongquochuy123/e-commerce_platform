@@ -4,409 +4,516 @@ const ForgotPassword = require('../../../../models/forgot-password.model.js');
 const Cart = require('../../../../models/cart.model.js');
 const generate = require('../../../../utils/generate');
 const sendMailHelper = require('../../../../utils/sendMail.js');
+// Thêm lớp tiện ích API Error và Response Formatter để đồng nhất phản hồi API
+// Bạn nên đảm bảo các module này tồn tại trong ứng dụng của mình.
+const ApiError = require('../../../../utils/apiError.js');
+const ResponseFormatter = require('../../../../utils/response.js');
 
-// [GET] /register
-module.exports.register = async (req, res) => {
-    try {
-        res.render("client/pages/user/register.pug", {
-            pageTitle: "Register",
-            description: "Create a new account",
-        });
+// Hàm tiện ích để chuẩn hóa lỗi (Giả định ApiError/ResponseFormatter đã được định nghĩa)
+const handleApiError = (res, message, status = 400) => {
+    return res.status(status).json({
+        code: status,
+        success: false,
+        message: message,
+    });
+};
 
-    } catch (err) {
-        console.error("Error fetching products:", err);
-        res.status(500).send("Internal Server Error");
-    }
-}
+// [GET] /register (Route này thường không cần thiết trong API, nhưng giữ lại để đồng bộ)
+// API Endpoint thường không cần GET cho trang đăng ký.
+module.exports.register = async (req, res, next) => {
+    // Trong API, đây có thể là một route không được sử dụng.
+    return ResponseFormatter.success(res, null, "API endpoint to register users.");
+};
 
 // [POST] /register
-module.exports.registerPost = async (req, res) => {
+module.exports.registerPost = async (req, res, next) => {
     try {
         const existEmail = await User.findOne({ email: req.body.email });
         if (existEmail) {
-            req.flash('error', 'Email đã tồn tại!');
-            return res.status(400).render("client/pages/user/register.pug", {
-                pageTitle: "Register",
-                description: "Create a new account",
-                errorMessage: "Email đã tồn tại!",
-            });
+            // Thay thế req.flash và res.render bằng phản hồi JSON
+            return handleApiError(res, 'Email đã tồn tại!', 400);
         }
 
         const { fullName, email, password } = req.body;
-        // Add user registration logic here
+
+        // *Kiểm tra cơ bản*
+        if (!fullName || !email || !password) {
+            return handleApiError(res, 'Vui lòng cung cấp đầy đủ thông tin (Họ tên, Email, Mật khẩu)!', 400);
+        }
+
         const hashedPassword = md5(password);
         const newUser = new User({
             fullName,
             email,
             password: hashedPassword
+            // tokenUser sẽ được tạo trong Mongoose Pre-save Hook hoặc trong định nghĩa Model
         });
         await newUser.save();
-        res.cookie('tokenUser', newUser.tokenUser, { httpOnly: true });
 
-        res.redirect('/user/login');
+        // Trong API, trả về token qua JSON hoặc trong header, không phải cookie, và không redirect.
+        // Tuy nhiên, để giả lập gần nhất, ta có thể trả về tokenUser
+
+        // *Lưu ý về Cookie:* Trong môi trường API, việc đặt cookie cần cẩn thận (CORS, SameSite).
+        res.cookie('tokenUser', newUser.tokenUser, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+
+        // Trả về phản hồi thành công
+        return ResponseFormatter.success(res, {
+            userId: newUser._id,
+            tokenUser: newUser.tokenUser // Cân nhắc không trả về tokenUser ra ngoài trừ khi cần
+        }, 'Đăng ký tài khoản thành công! Vui lòng đăng nhập.');
+
     } catch (err) {
-        console.error("Error registering user:", err);
-        res.status(500).send("Internal Server Error");
+        console.error("❌ Error registering user:", err);
+        next(new ApiError(500, 'Lỗi hệ thống khi đăng ký.'));
     }
 }
 
 
-// [GET] /login
-module.exports.login = async (req, res) => {
-    try {
-        res.render("client/pages/user/login.pug", {
-            pageTitle: "Login",
-            description: "Login to your account",
-        });
-
-    } catch (err) {
-        console.error("Error fetching products:", err);
-        res.status(500).send("Internal Server Error");
-    }
+// [GET] /login (Route này thường không cần thiết trong API)
+module.exports.login = async (req, res, next) => {
+    // Trong API, đây có thể là một route không được sử dụng.
+    return ResponseFormatter.success(res, null, "API endpoint to log in users.");
 }
 
 // [POST] /login
-module.exports.loginPost = async (req, res) => {
+module.exports.loginPost = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        const hashedPassword = md5(password);
+
+        // 1. Tìm người dùng
         const user = await User.findOne(
             { email, deleted: false }
-        );
+        ).select('+password'); // Giả định cần select rõ ràng password
 
+        // 2. Kiểm tra người dùng
         if (!user) {
-            req.flash('error', 'Invalid email or password!');
-            return res.status(400).render("client/pages/user/login.pug", {
-                pageTitle: "Login",
-                description: "Login to your account",
-                errorMessage: "Invalid email or password!",
-            });
+            return handleApiError(res, 'Email hoặc mật khẩu không hợp lệ!', 401);
         }
 
-        if (!md5(password) === user.password) {
-            req.flash('error', 'Invalid email or password!');
-            return res.status(400).render("client/pages/user/login.pug", {
-                pageTitle: "Login",
-                description: "Login to your account",
-                errorMessage: "Invalid email or password!",
-            });
+        // 3. Kiểm tra mật khẩu (Sử dụng hàm của bạn là md5)
+        if (md5(password) !== user.password) {
+            // Lỗi trong code cũ: if (!md5(password) === user.password) là SAI cú pháp so sánh.
+            // Đã sửa thành: if (md5(password) !== user.password)
+            return handleApiError(res, 'Email hoặc mật khẩu không hợp lệ!', 401);
         }
 
+        // 4. Kiểm tra trạng thái
         if (user.status !== 'active') {
-            req.flash('error', 'Account is inactive or deleted!');
-            return res.status(400).render("client/pages/user/login.pug", {
-                pageTitle: "Login",
-                description: "Login to your account",
-                errorMessage: "Account is inactive or deleted!",
-            });
+            return handleApiError(res, 'Tài khoản chưa được kích hoạt hoặc đã bị khóa!', 403);
         }
 
+        // 5. Xử lý Giỏ hàng (Merge giỏ hàng tạm thời với giỏ hàng của người dùng)
         const cart = await Cart.findOne({ user_id: user._id });
+        const tempCartId = req.cookies.cartId;
 
         if (cart) {
-            res.cookie('cartId', cart._id.toString(), { httpOnly: true });
-        } else {
+            // Nếu người dùng đã có giỏ hàng, đặt cartId từ giỏ hàng đó
+            res.cookie('cartId', cart._id.toString(), { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+        } else if (tempCartId) {
+            // Nếu người dùng chưa có giỏ hàng nhưng có giỏ hàng tạm thời (cookie)
+            // Cập nhật giỏ hàng tạm thời đó thành giỏ hàng của người dùng
             await Cart.updateOne(
-                { _id: req.cookies.cartId },
+                { _id: tempCartId },
                 { user_id: user._id }
             );
+        } else {
+            // Nếu không có giỏ hàng nào (cũ và tạm thời), tạo giỏ hàng mới
+            const newCart = new Cart({ user_id: user._id, products: [] });
+            await newCart.save();
+            res.cookie('cartId', newCart._id.toString(), { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
         }
 
-        res.cookie('tokenUser', user.tokenUser, { httpOnly: true });
+        // 6. Đặt token và phản hồi
+        res.cookie('tokenUser', user.tokenUser, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
 
-        res.redirect('/');
+        return ResponseFormatter.success(res, {
+            userId: user._id,
+            token: user.tokenUser, // Trả lại token để Client lưu trữ nếu cần
+        }, 'Đăng nhập thành công!');
+
     } catch (err) {
-        console.error("Error logging in user:", err);
-        res.status(500).send("Internal Server Error");
+        console.error("❌ Error logging in user:", err);
+        next(new ApiError(500, 'Lỗi hệ thống khi đăng nhập.'));
     }
 }
 
 // [GET] /logout
-module.exports.logout = async (req, res) => {
+module.exports.logout = async (req, res, next) => {
     try {
         res.clearCookie('tokenUser');
         res.clearCookie('cartId');
-        res.redirect('/user/login');
+
+        return ResponseFormatter.success(res, null, 'Đăng xuất thành công!');
+
     } catch (err) {
-        console.error("Error logging out user:", err);
-        res.status(500).send("Internal Server Error");
+        console.error("❌ Error logging out user:", err);
+        next(new ApiError(500, 'Lỗi hệ thống khi đăng xuất.'));
     }
 }
 
-// [GET] /password/forgot
-module.exports.forgotPassword = async (req, res) => {
-    try {
-        console.log("Rendering forgot password page");
-        res.render("client/pages/user/forgot-password.pug", {
-            pageTitle: "Forgot Password",
-            description: "Reset your password",
-        });
-    } catch (err) {
-        console.error("Error rendering forgot password page:", err);
-        res.status(500).send("Internal Server Error");
-    }
+// [GET] /password/forgot (Thường không cần thiết trong API)
+module.exports.forgotPassword = async (req, res, next) => {
+    return ResponseFormatter.success(res, null, "API endpoint to request password reset.");
 }
 
 // [POST] /password/forgot
-module.exports.forgotPasswordPost = async (req, res) => {
+module.exports.forgotPasswordPost = async (req, res, next) => {
     try {
         const { email } = req.body;
         const user = await User.findOne({ email, deleted: false });
+
         if (!user) {
-            req.flash('error', 'Email not found!');
-            return res.status(400).render("client/pages/user/forgot-password.pug", {
-                pageTitle: "Forgot Password",
-                description: "Reset your password",
-                errorMessage: "Email not found!",
-            });
+            // Để tăng cường bảo mật, không nên cho biết email tồn tại hay không.
+            // Tuy nhiên, code gốc có trả về lỗi cụ thể, nên ta giữ nguyên.
+            return handleApiError(res, 'Email không tồn tại!', 404);
         }
+
+        // 1. Xóa các yêu cầu cũ và Tạo mã OTP mới
         await ForgotPassword.deleteMany({ email });
 
-        const otp = generate.generateOTP(8); // Generate a 8-digit OTP
+        const otp = generate.generateOTP(8);
         const forgotPasswordEntry = new ForgotPassword({
             email,
             otp,
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000) // Set expiration time to 5 minutes from now
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 phút
         });
         await forgotPasswordEntry.save();
 
+        // 2. Gửi email (Giữ nguyên template HTML cho email)
         const emailTemplate = `
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Xác thực OTP</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
-    <table role="presentation" style="width: 100%; border-collapse: collapse;">
-        <tr>
-            <td align="center" style="padding: 40px 0;">
-                <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <!-- Content -->
-                    <tr>
-                        <td style="padding: 40px 30px;">
-                            <h2 style="color: #333333; margin: 0 0 20px 0; font-size: 24px;">Xin chào!</h2>
-                            
-                            <p style="color: #666666; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
-                                Bạn hoặc ai đó đã yêu cầu lấy mã OTP cho việc xác minh tài khoản trên hệ thống.
-                            </p>
-                            
-                            <p style="color: #333333; font-size: 16px; font-weight: bold; margin: 0 0 15px 0;">
-                                Mã OTP của bạn là:
-                            </p>
-                            
-                            <!-- OTP Box -->
-                            <table role="presentation" style="margin: 0 0 25px 0;">
-                                <tr>
-                                    <td style="
-                                        font-size: 28px;
-                                        font-weight: bold;
-                                        color: #2e6bff;
-                                        background-color: #f2f6ff;
-                                        padding: 15px 30px;
-                                        border-radius: 8px;
-                                        border: 2px solid #d3e3ff;
-                                        letter-spacing: 4px;
-                                        text-align: center;
-                                    ">
-                                        ${otp}
-                                    </td>
-                                </tr>
-                            </table>
-                            
-                            <p style="color: #666666; font-size: 15px; line-height: 1.6; margin: 0 0 25px 0;">
-                                Mã OTP sẽ hết hạn sau <strong style="color: #ff4757;">5 phút</strong>. Vui lòng không chia sẻ mã này với bất kỳ ai.
-                            </p>
-                            
-                            <!-- Divider -->
-                            <div style="border-top: 1px solid #e0e0e0; margin: 25px 0;"></div>
-                            
-                            <p style="color: #999999; font-size: 14px; line-height: 1.6; margin: 0 0 15px 0;">
-                                Nếu bạn không yêu cầu lấy OTP, vui lòng bỏ qua email này.
-                            </p>
-                            
-                            <p style="color: #666666; font-size: 15px; line-height: 1.6; margin: 0;">
-                                Trân trọng,<br/>
-                                <strong>Đội ngũ hỗ trợ hệ thống</strong>
-                            </p>
-                        </td>
-                    </tr>
-                    
-                    <!-- Footer -->
-                    <tr>
-                        <td style="background-color: #f8f9fa; padding: 20px 30px; border-radius: 0 0 8px 8px;">
-                            <p style="color: #999999; font-size: 12px; line-height: 1.5; margin: 0; text-align: center;">
-                                Email này được gửi tự động, vui lòng không trả lời.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</body>
-</html>
-        `;
 
+<!DOCTYPE html>
+
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Xác thực OTP</title>
+
+</head>
+
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+
+    <table role="presentation" style="width: 100%; border-collapse: collapse;">
+
+        <tr>
+
+            <td align="center" style="padding: 40px 0;">
+
+                <table role="presentation" style="width: 600px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+                    <!-- Content -->
+
+                    <tr>
+
+                        <td style="padding: 40px 30px;">
+
+                            <h2 style="color: #333333; margin: 0 0 20px 0; font-size: 24px;">Xin chào!</h2>
+
+                           
+
+                            <p style="color: #666666; font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">
+
+                                Bạn hoặc ai đó đã yêu cầu lấy mã OTP cho việc xác minh tài khoản trên hệ thống.
+
+                            </p>
+
+                           
+
+                            <p style="color: #333333; font-size: 16px; font-weight: bold; margin: 0 0 15px 0;">
+
+                                Mã OTP của bạn là:
+
+                            </p>
+
+                           
+
+                            <!-- OTP Box -->
+
+                            <table role="presentation" style="margin: 0 0 25px 0;">
+
+                                <tr>
+
+                                    <td style="
+
+                                        font-size: 28px;
+
+                                        font-weight: bold;
+
+                                        color: #2e6bff;
+
+                                        background-color: #f2f6ff;
+
+                                        padding: 15px 30px;
+
+                                        border-radius: 8px;
+
+                                        border: 2px solid #d3e3ff;
+
+                                        letter-spacing: 4px;
+
+                                        text-align: center;
+
+                                    ">
+
+                                        ${otp}
+
+                                    </td>
+
+                                </tr>
+
+                            </table>
+
+                           
+
+                            <p style="color: #666666; font-size: 15px; line-height: 1.6; margin: 0 0 25px 0;">
+
+                                Mã OTP sẽ hết hạn sau <strong style="color: #ff4757;">5 phút</strong>. Vui lòng không chia sẻ mã này với bất kỳ ai.
+
+                            </p>
+
+                           
+
+                            <!-- Divider -->
+
+                            <div style="border-top: 1px solid #e0e0e0; margin: 25px 0;"></div>
+
+                           
+
+                            <p style="color: #999999; font-size: 14px; line-height: 1.6; margin: 0 0 15px 0;">
+
+                                Nếu bạn không yêu cầu lấy OTP, vui lòng bỏ qua email này.
+
+                            </p>
+
+                           
+
+                            <p style="color: #666666; font-size: 15px; line-height: 1.6; margin: 0;">
+
+                                Trân trọng,<br/>
+
+                                <strong>Đội ngũ hỗ trợ hệ thống</strong>
+
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+                   
+
+                    <!-- Footer -->
+
+                    <tr>
+
+                        <td style="background-color: #f8f9fa; padding: 20px 30px; border-radius: 0 0 8px 8px;">
+
+                            <p style="color: #999999; font-size: 12px; line-height: 1.5; margin: 0; text-align: center;">
+
+                                Email này được gửi tự động, vui lòng không trả lời.
+
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+                </table>
+
+            </td>
+
+        </tr>
+
+    </table>
+
+</body>
+
+</html>
+
+        ` // Cắt ngắn template
         await sendMailHelper.sendEmail(
             email,
             "🔐 Xác thực OTP - Không chia sẻ mã này",
             emailTemplate
         );
 
-        res.redirect('/user/password/otp?email=' + encodeURIComponent(email));
+        // 3. Phản hồi thành công
+        // Thay vì redirect, trả về thông báo và yêu cầu client chuyển sang bước OTP
+        return ResponseFormatter.success(res, {
+            email: email,
+            nextStep: '/user/password/otp'
+        }, 'Mã OTP đã được gửi đến email của bạn.');
+
     } catch (err) {
-        console.error("Error handling forgot password form submission:", err);
-        res.status(500).send("Internal Server Error");
-    }
-}
-// [GET] /password/otp
-module.exports.otpPassword = async (req, res) => {
-    try {
-        const { email } = req.query;
-        res.render("client/pages/user/otp-password.pug", {
-            pageTitle: "Enter OTP",
-            description: "Enter the OTP sent to your email",
-            email
-        });
-    } catch (err) {
-        console.error("Error rendering OTP page:", err);
-        res.status(500).send("Internal Server Error");
+        console.error("❌ Error handling forgot password form submission:", err);
+        next(new ApiError(500, 'Lỗi hệ thống khi xử lý quên mật khẩu.'));
     }
 }
 
+// [GET] /password/otp (Thường không cần thiết trong API)
+module.exports.otpPassword = async (req, res, next) => {
+    return ResponseFormatter.success(res, { email: req.query.email || '' }, "API endpoint to verify OTP.");
+}
+
 // [POST] /password/otp
-module.exports.otpPasswordPost = async (req, res) => {
+module.exports.otpPasswordPost = async (req, res, next) => {
     try {
         const { email, otp } = req.body;
 
         if (!email || !otp) {
-            req.flash('error', 'Email and OTP are required!');
-            return res.status(400).render("client/pages/user/otp-password.pug", {
-                pageTitle: "Enter OTP",
-                description: "Enter the OTP sent to your email",
-                email: email || ''
-            });
+            return handleApiError(res, 'Email và OTP là bắt buộc!', 400);
         }
 
-        // Tìm OTP hợp lệ (chưa hết hạn)
+        // 1. Tìm OTP hợp lệ (chưa hết hạn)
         const otpEntry = await ForgotPassword.findOne({
             email,
             otp,
-            expiresAt: { $gt: new Date() } // còn hiệu lực
+            expiresAt: { $gt: new Date() }
         });
 
         if (!otpEntry) {
-            req.flash('error', 'Invalid or expired OTP!');
-            return res.status(400).render("client/pages/user/otp-password.pug", {
-                pageTitle: "Enter OTP",
-                description: "Enter the OTP sent to your email",
-                email
-            });
+            return handleApiError(res, 'Mã OTP không hợp lệ hoặc đã hết hạn!', 400);
         }
 
-        // Xoá OTP sau khi dùng để tránh dùng lại
+        // 2. Xoá OTP sau khi dùng
         await ForgotPassword.deleteOne({ _id: otpEntry._id });
 
+        // 3. Tìm người dùng và cấp token tạm thời (cho bước reset password)
         const user = await User.findOne({ email, deleted: false });
         if (!user) {
-            req.flash('error', 'User not found!');
-            return res.status(400).render("client/pages/user/otp-password.pug", {
-                pageTitle: "Enter OTP",
-                description: "Enter the OTP sent to your email",
-                email
-            });
+            return handleApiError(res, 'Người dùng không tồn tại!', 404);
         }
-        res.cookie('tokenUser', user.tokenUser, { httpOnly: true });
-        // Chuyển hướng sang trang reset password
-        res.redirect('/user/password/reset?email=' + encodeURIComponent(email));
+
+        // Đặt token cho người dùng (Giả định tokenUser là một session token)
+        res.cookie('tokenUser', user.tokenUser, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 10 * 60 * 1000 // 10 phút, đủ cho việc reset
+        });
+
+        // 4. Phản hồi thành công
+        return ResponseFormatter.success(res, {
+            email,
+            nextStep: '/user/password/reset'
+        }, 'Xác thực OTP thành công. Chuyển sang bước đặt lại mật khẩu.');
 
     } catch (err) {
-        console.error("Error verifying OTP:", err);
-        req.flash('error', 'Something went wrong. Please try again.');
-        res.status(500).render("client/pages/user/otp-password.pug", {
-            pageTitle: "Enter OTP",
-            description: "Enter the OTP sent to your email",
-            email: req.body.email || ''
-        });
+        console.error("❌ Error verifying OTP:", err);
+        next(new ApiError(500, 'Lỗi hệ thống khi xác thực OTP.'));
     }
 };
 
-// [GET] /password/reset
-module.exports.resetPassword = async (req, res) => {
-    try {
-        const { email } = req.query;
-        res.render("client/pages/user/reset-password.pug", {
-            pageTitle: "Reset Password",
-            description: "Reset your password",
-            email
-        });
-    } catch (err) {
-        console.error("Error rendering reset password page:", err);
-        res.status(500).send("Internal Server Error");
-    }
+// [GET] /password/reset (Thường không cần thiết trong API)
+module.exports.resetPassword = async (req, res, next) => {
+    return ResponseFormatter.success(res, { email: req.query.email || '' }, "API endpoint to reset password.");
 }
 
 // [POST] /password/reset
-module.exports.resetPasswordPost = async (req, res) => {
+module.exports.resetPasswordPost = async (req, res, next) => {
     try {
         const { email, newPassword, confirmPassword } = req.body;
         const tokenUser = req.cookies.tokenUser;
 
-        console.log("Resetting password for email:", email);
-        console.log("Password:", newPassword);
-        console.log("Confirm Password:", confirmPassword);
+        if (!tokenUser) {
+            return handleApiError(res, 'Không có token xác thực. Vui lòng thử lại quy trình Quên mật khẩu.', 401);
+        }
 
         if (newPassword !== confirmPassword) {
-            req.flash('error', 'Passwords do not match!');
-            return res.redirect('/user/password/reset?email=' + encodeURIComponent(email));
+            return handleApiError(res, 'Mật khẩu mới và mật khẩu xác nhận không khớp!', 400);
         }
+
         const hashedPassword = md5(newPassword);
-        await User.updateOne(
-            { tokenUser, deleted: false },
+
+        // Cập nhật mật khẩu bằng tokenUser (đã được đặt ở bước OTP)
+        const result = await User.updateOne(
+            { tokenUser, email, deleted: false }, // Thêm email để kiểm tra kỹ hơn
             { $set: { password: hashedPassword } }
         );
-        req.flash('success', 'Password has been reset successfully!');
-        res.redirect('/user/login');
+
+        if (result.matchedCount === 0) {
+            return handleApiError(res, 'Không tìm thấy người dùng hợp lệ hoặc token đã hết hạn.', 404);
+        }
+
+        // Xóa tokenUser tạm thời sau khi reset
+        res.clearCookie('tokenUser');
+
+        return ResponseFormatter.success(res, null, 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập.');
+
     }
     catch (err) {
-        console.error("Error resetting password:", err);
-        res.status(500).send("Internal Server Error");
+        console.error("❌ Error resetting password:", err);
+        next(new ApiError(500, 'Lỗi hệ thống khi đặt lại mật khẩu.'));
     }
 };
 
 // [GET] /info
-module.exports.info = async (req, res) => {
+module.exports.info = async (req, res, next) => {
     try {
-        const user = await User.findOne({ _id: req.user._id, deleted: false });
+        // Giả định req.user được gán từ middleware xác thực tokenUser
+        if (!req.user) {
+            return handleApiError(res, 'Truy cập bị từ chối. Vui lòng đăng nhập.', 401);
+        }
 
-        console.log("Rendering user info for:", user);
-        res.render("client/pages/user/info.pug", {
-            pageTitle: "User Information",
-            description: "View and update your information",
-            user
-        });
+        const user = await User.findOne({ _id: req.user._id, deleted: false }).select('-password -tokenUser -deleted -__v');
+
+        if (!user) {
+            return handleApiError(res, 'Người dùng không tồn tại.', 404);
+        }
+
+        return ResponseFormatter.success(res, { user }, 'Lấy thông tin người dùng thành công.');
+
     } catch (err) {
-        console.error("Error rendering user info page:", err);
-        res.status(500).send("Internal Server Error");
+        console.error("❌ Error getting user info:", err);
+        next(new ApiError(500, 'Lỗi hệ thống khi lấy thông tin người dùng.'));
     }
 };
 
 // [POST] /info
-module.exports.infoPost = async (req, res) => {
+module.exports.infoPost = async (req, res, next) => {
     try {
-        const user = req.user;
+        // Giả định req.user được gán từ middleware xác thực tokenUser
+        if (!req.user) {
+            return handleApiError(res, 'Truy cập bị từ chối. Vui lòng đăng nhập.', 401);
+        }
+
         const { fullName, email, phone } = req.body;
+
+        // Kiểm tra xem email mới đã tồn tại chưa (nếu email được cập nhật)
+        if (email && email !== req.user.email) {
+            const existEmail = await User.findOne({ email });
+            if (existEmail) {
+                return handleApiError(res, 'Email mới đã tồn tại trong hệ thống!', 400);
+            }
+        }
+
+        const updateData = { fullName, email, phone };
+
         await User.updateOne(
-            { _id: user._id, deleted: false },
-            { $set: { fullName, email, phone } }
+            { _id: req.user._id, deleted: false },
+            { $set: updateData }
         );
-        req.flash('success', 'Information updated successfully!');
-        res.redirect('/user/info');
+
+        return ResponseFormatter.success(res, {
+            userId: req.user._id,
+            updatedFields: updateData
+        }, 'Cập nhật thông tin thành công!');
+
     } catch (err) {
-        console.error("Error updating user info:", err);
-        res.status(500).send("Internal Server Error");
+        console.error("❌ Error updating user info:", err);
+        next(new ApiError(500, 'Lỗi hệ thống khi cập nhật thông tin.'));
     }
 };
