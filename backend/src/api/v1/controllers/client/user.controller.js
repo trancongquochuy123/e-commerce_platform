@@ -9,15 +9,6 @@ const sendMailHelper = require('../../../../utils/sendMail.js');
 const ApiError = require('../../../../utils/apiError.js');
 const ResponseFormatter = require('../../../../utils/response.js');
 
-// Hàm tiện ích để chuẩn hóa lỗi (Giả định ApiError/ResponseFormatter đã được định nghĩa)
-const handleApiError = (res, message, status = 400) => {
-    return res.status(status).json({
-        code: status,
-        success: false,
-        message: message,
-    });
-};
-
 // [GET] /register (Route này thường không cần thiết trong API, nhưng giữ lại để đồng bộ)
 // API Endpoint thường không cần GET cho trang đăng ký.
 module.exports.register = async (req, res, next) => {
@@ -31,14 +22,14 @@ module.exports.registerPost = async (req, res, next) => {
         const existEmail = await User.findOne({ email: req.body.email });
         if (existEmail) {
             // Thay thế req.flash và res.render bằng phản hồi JSON
-            return handleApiError(res, 'Email đã tồn tại!', 400);
+            return ApiError(res, 'Email đã tồn tại!', 400);
         }
 
         const { fullName, email, password } = req.body;
 
         // *Kiểm tra cơ bản*
         if (!fullName || !email || !password) {
-            return handleApiError(res, 'Vui lòng cung cấp đầy đủ thông tin (Họ tên, Email, Mật khẩu)!', 400);
+            return ApiError(res, 'Vui lòng cung cấp đầy đủ thông tin (Họ tên, Email, Mật khẩu)!', 400);
         }
 
         const hashedPassword = md5(password);
@@ -91,19 +82,19 @@ module.exports.loginPost = async (req, res, next) => {
 
         // 2. Kiểm tra người dùng
         if (!user) {
-            return handleApiError(res, 'Email hoặc mật khẩu không hợp lệ!', 401);
+            return ApiError(res, 'Email hoặc mật khẩu không hợp lệ!', 401);
         }
 
         // 3. Kiểm tra mật khẩu (Sử dụng hàm của bạn là md5)
         if (md5(password) !== user.password) {
             // Lỗi trong code cũ: if (!md5(password) === user.password) là SAI cú pháp so sánh.
             // Đã sửa thành: if (md5(password) !== user.password)
-            return handleApiError(res, 'Email hoặc mật khẩu không hợp lệ!', 401);
+            return ApiError(res, 'Email hoặc mật khẩu không hợp lệ!', 401);
         }
 
         // 4. Kiểm tra trạng thái
         if (user.status !== 'active') {
-            return handleApiError(res, 'Tài khoản chưa được kích hoạt hoặc đã bị khóa!', 403);
+            return ApiError(res, 'Tài khoản chưa được kích hoạt hoặc đã bị khóa!', 403);
         }
 
         // 5. Xử lý Giỏ hàng (Merge giỏ hàng tạm thời với giỏ hàng của người dùng)
@@ -173,7 +164,7 @@ module.exports.forgotPasswordPost = async (req, res, next) => {
         if (!user) {
             // Để tăng cường bảo mật, không nên cho biết email tồn tại hay không.
             // Tuy nhiên, code gốc có trả về lỗi cụ thể, nên ta giữ nguyên.
-            return handleApiError(res, 'Email không tồn tại!', 404);
+            return ApiError(res, 'Email không tồn tại!', 404);
         }
 
         // 1. Xóa các yêu cầu cũ và Tạo mã OTP mới
@@ -375,7 +366,7 @@ module.exports.otpPasswordPost = async (req, res, next) => {
         const { email, otp } = req.body;
 
         if (!email || !otp) {
-            return handleApiError(res, 'Email và OTP là bắt buộc!', 400);
+            return ApiError(res, 'Email và OTP là bắt buộc!', 400);
         }
 
         // 1. Tìm OTP hợp lệ (chưa hết hạn)
@@ -386,7 +377,7 @@ module.exports.otpPasswordPost = async (req, res, next) => {
         });
 
         if (!otpEntry) {
-            return handleApiError(res, 'Mã OTP không hợp lệ hoặc đã hết hạn!', 400);
+            return ApiError(res, 'Mã OTP không hợp lệ hoặc đã hết hạn!', 400);
         }
 
         // 2. Xoá OTP sau khi dùng
@@ -395,7 +386,7 @@ module.exports.otpPasswordPost = async (req, res, next) => {
         // 3. Tìm người dùng và cấp token tạm thời (cho bước reset password)
         const user = await User.findOne({ email, deleted: false });
         if (!user) {
-            return handleApiError(res, 'Người dùng không tồn tại!', 404);
+            return ApiError(res, 'Người dùng không tồn tại!', 404);
         }
 
         // Đặt token cho người dùng (Giả định tokenUser là một session token)
@@ -429,11 +420,11 @@ module.exports.resetPasswordPost = async (req, res, next) => {
         const tokenUser = req.cookies.tokenUser;
 
         if (!tokenUser) {
-            return handleApiError(res, 'Không có token xác thực. Vui lòng thử lại quy trình Quên mật khẩu.', 401);
+            return ApiError(res, 'Không có token xác thực. Vui lòng thử lại quy trình Quên mật khẩu.', 401);
         }
 
         if (newPassword !== confirmPassword) {
-            return handleApiError(res, 'Mật khẩu mới và mật khẩu xác nhận không khớp!', 400);
+            return ApiError(res, 'Mật khẩu mới và mật khẩu xác nhận không khớp!', 400);
         }
 
         const hashedPassword = md5(newPassword);
@@ -445,7 +436,7 @@ module.exports.resetPasswordPost = async (req, res, next) => {
         );
 
         if (result.matchedCount === 0) {
-            return handleApiError(res, 'Không tìm thấy người dùng hợp lệ hoặc token đã hết hạn.', 404);
+            return ApiError(res, 'Không tìm thấy người dùng hợp lệ hoặc token đã hết hạn.', 404);
         }
 
         // Xóa tokenUser tạm thời sau khi reset
@@ -465,13 +456,13 @@ module.exports.info = async (req, res, next) => {
     try {
         // Giả định req.user được gán từ middleware xác thực tokenUser
         if (!req.user) {
-            return handleApiError(res, 'Truy cập bị từ chối. Vui lòng đăng nhập.', 401);
+            return ApiError(res, 'Truy cập bị từ chối. Vui lòng đăng nhập.', 401);
         }
 
         const user = await User.findOne({ _id: req.user._id, deleted: false }).select('-password -tokenUser -deleted -__v');
 
         if (!user) {
-            return handleApiError(res, 'Người dùng không tồn tại.', 404);
+            return ApiError(res, 'Người dùng không tồn tại.', 404);
         }
 
         return ResponseFormatter.success(res, { user }, 'Lấy thông tin người dùng thành công.');
@@ -487,7 +478,7 @@ module.exports.infoPost = async (req, res, next) => {
     try {
         // Giả định req.user được gán từ middleware xác thực tokenUser
         if (!req.user) {
-            return handleApiError(res, 'Truy cập bị từ chối. Vui lòng đăng nhập.', 401);
+            return ApiError(res, 'Truy cập bị từ chối. Vui lòng đăng nhập.', 401);
         }
 
         const { fullName, email, phone } = req.body;
@@ -496,7 +487,7 @@ module.exports.infoPost = async (req, res, next) => {
         if (email && email !== req.user.email) {
             const existEmail = await User.findOne({ email });
             if (existEmail) {
-                return handleApiError(res, 'Email mới đã tồn tại trong hệ thống!', 400);
+                return ApiError(res, 'Email mới đã tồn tại trong hệ thống!', 400);
             }
         }
 
