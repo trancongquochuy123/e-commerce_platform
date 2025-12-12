@@ -1,11 +1,16 @@
 /**
- * Response Formatter
+ * Response Formatter (response.js)
  * Chuẩn hóa format response cho API
  */
 
 class ResponseFormatter {
     /**
      * Success Response
+     * @param {object} res - Express response object
+     * @param {any} [data=null] - Dữ liệu trả về
+     * @param {string} [message='Success'] - Thông báo
+     * @param {number} [statusCode=200] - Mã trạng thái HTTP
+     * @param {object} [meta=null] - Metadata (pagination,...)
      */
     static success(res, data = null, message = 'Success', statusCode = 200, meta = null) {
         const response = {
@@ -15,7 +20,7 @@ class ResponseFormatter {
             timestamp: new Date().toISOString()
         };
 
-        // Add metadata if exists (pagination, etc.)
+        // Thêm metadata nếu có
         if (meta) {
             response.meta = meta;
         }
@@ -56,7 +61,13 @@ class ResponseFormatter {
     }
 
     /**
-     * Error Response
+     * Error Response - Chỉ dùng cho Express Error Handler
+     * (Thường không gọi trực tiếp trong controller mà là từ error middleware)
+     * @param {object} res - Express response object
+     * @param {string} [message='Error'] - Thông báo lỗi
+     * @param {number} [statusCode=500] - Mã trạng thái HTTP
+     * @param {string} [code='ERROR'] - Mã lỗi nội bộ
+     * @param {any} [errors=null] - Chi tiết lỗi
      */
     static error(res, message = 'Error', statusCode = 500, code = 'ERROR', errors = null) {
         const response = {
@@ -73,7 +84,7 @@ class ResponseFormatter {
     }
 
     /**
-     * Validation Error Response
+     * Validation Error Response (422)
      */
     static validationError(res, errors) {
         return this.error(

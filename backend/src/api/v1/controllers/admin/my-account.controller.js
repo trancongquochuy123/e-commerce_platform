@@ -20,7 +20,6 @@ module.exports.edit = (req, res) => {
 }
 
 // [PATCH] admin/my-account/edit
-// [PATCH] admin/my-account/edit
 module.exports.editPatch = async (req, res) => {
     const id = res.locals.user._id;
 

@@ -3,20 +3,23 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon --inspect server.js",
+    "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start-no-debug": "nodemon server.js"
+    "start-no-debug": "nodemon server.js",
+    "seed": "node seed/seed.js",
+    "seed:recover": "node seed/seed.js recover"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@faker-js/faker": "^10.1.0",
     "body-parser": "^2.2.0",
     "cloudinary": "^2.7.0",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "express-flash": "^0.0.2",
     "express-session": "^1.18.1",

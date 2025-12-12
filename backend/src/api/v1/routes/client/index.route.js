@@ -20,7 +20,7 @@ router.use(cartRateLimit.cartCreationLimit);
 
 router.use(settingsMiddleware.SettingGeneral);
 router.use(categoryMiddleware.category);
-router.use(cartMiddleware.cartId);
+// router.use(cartMiddleware.cartId);
 router.use(userMiddleware.infoUser);
 
 // Sub routes

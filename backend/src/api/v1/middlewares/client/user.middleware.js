@@ -1,34 +1,33 @@
-// Middleware xác thực user cho client-side routes
-// 3 Middleware khác nhau:
-    // requireAuth - BẮT BUỘC login:
-        // Dùng cho logout, profile, orders, etc.
-        // Redirect về login nếu chưa đăng nhập
-
-    // infoUser - KHÔNG bắt buộc login:
-        // Dùng globally để lấy info user nếu có
-        // Không redirect, chỉ set res.locals.user = null nếu không có
-
-    // checkLoggedIn - Ngăn user đã login:
-        // Dùng cho trang login/register
-        // Redirect về home nếu đã đăng nhập
-
-// Lợi ích:
-// ✅ Phân biệt rõ routes cần/không cần auth
-// ✅ Tránh redirect loop
-// ✅ Xử lý đầy đủ edge cases
-// ✅ Có thể hiển thị thông tin user ở mọi trang
-// ✅ Code rõ ràng, dễ maintain
-
 const User = require("../../../../models/user.model");
+const ApiError = require('../../../../utils/apiError.js'); 
+// Giả định bạn có lớp ApiError hoặc sử dụng hàm tiện ích cho lỗi JSON
 
-// Middleware để check user đã login chưa (bắt buộc)
+// Hàm tiện ích chuẩn hóa lỗi API
+const unauthorizedResponse = (res, message) => {
+    return res.status(401).json({
+        code: 401,
+        success: false,
+        message: message || "Truy cập bị từ chối. Vui lòng đăng nhập.",
+    });
+};
+
+const forbiddenResponse = (res, message) => {
+    return res.status(403).json({
+        code: 403,
+        success: false,
+        message: message || "Tài khoản không được phép truy cập.",
+    });
+};
+
+
+// 1. requireAuth (BẮT BUỘC Đăng nhập)
+// Dùng cho các route API cần bảo vệ (ví dụ: Đặt hàng, Xem hồ sơ)
 module.exports.requireAuth = async (req, res, next) => {
     const tokenUser = req.cookies.tokenUser;
 
-    // Không có token -> redirect đến login
+    // Không có token -> Trả về lỗi 401
     if (!tokenUser) {
-        req.flash('error', 'Vui lòng đăng nhập để tiếp tục');
-        return res.redirect(`/user/login`);
+        return unauthorizedResponse(res, 'Yêu cầu token xác thực. Vui lòng đăng nhập.');
     }
 
     try {
@@ -36,35 +35,33 @@ module.exports.requireAuth = async (req, res, next) => {
             tokenUser: tokenUser,
             deleted: false,
             status: 'active'
-        }).select("-password").lean();
+        }).select("-password -__v").lean();
 
-        // Token không hợp lệ hoặc user không tồn tại
+        // Token không hợp lệ hoặc user không tồn tại/không hoạt động
         if (!user) {
             res.clearCookie("tokenUser");
-            req.flash('error', 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại');
-            return res.redirect(`/user/login`);
+            return unauthorizedResponse(res, 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn.');
         }
 
-        // Lưu thông tin user vào locals và request
-        res.locals.user = user;
+        // Lưu thông tin user vào request để controller sử dụng
         req.user = user;
         
         next();
     } catch (error) {
-        console.error("User auth middleware error:", error);
+        console.error("❌ API requireAuth middleware error:", error);
         res.clearCookie("tokenUser");
-        req.flash('error', 'Đã có lỗi xảy ra. Vui lòng đăng nhập lại');
-        return res.redirect(`/user/login`);
+        return unauthorizedResponse(res, 'Lỗi hệ thống khi xác thực.');
     }
 };
 
-// Middleware để lấy thông tin user nếu có (không bắt buộc)
+// 2. infoUser (Lấy thông tin User – KHÔNG bắt buộc)
+// Dùng cho các route API công khai muốn biết ai đang gọi (ví dụ: Lấy sản phẩm nhưng có thêm giỏ hàng/yêu thích cá nhân)
 module.exports.infoUser = async (req, res, next) => {
     const tokenUser = req.cookies.tokenUser;
 
-    // Không có token -> bỏ qua, không redirect
+    // Không có token -> Bỏ qua và tiếp tục
     if (!tokenUser) {
-        res.locals.user = null;
+        req.user = null;
         return next();
     }
 
@@ -73,32 +70,34 @@ module.exports.infoUser = async (req, res, next) => {
             tokenUser: tokenUser,
             deleted: false,
             status: 'active'
-        }).select("-password").lean();
+        }).select("-password -__v").lean();
 
         if (user) {
-            res.locals.user = user;
+            // Lưu user vào request
             req.user = user;
         } else {
-            // Token không hợp lệ -> xóa cookie nhưng không redirect
+            // Token không hợp lệ -> Xóa cookie và đặt req.user = null
             res.clearCookie("tokenUser");
-            res.locals.user = null;
+            req.user = null;
         }
         
         next();
     } catch (error) {
-        console.error("User info middleware error:", error);
+        console.error("❌ API infoUser middleware error:", error);
         res.clearCookie("tokenUser");
-        res.locals.user = null;
-        next();
+        req.user = null;
+        next(); // Tiếp tục cho dù có lỗi, vì đây là middleware không bắt buộc
     }
 };
 
-// Middleware để check user chưa login (cho trang login/register)
+// 3. checkLoggedIn (Ngăn User Đã Đăng nhập)
+// Middleware này thường ít dùng trong API REST thuần túy, 
+// nhưng nếu có, nó sẽ ngăn người dùng gọi lại /login hay /register.
 module.exports.checkLoggedIn = async (req, res, next) => {
     const tokenUser = req.cookies.tokenUser;
 
     if (!tokenUser) {
-        return next();
+        return next(); // Chưa login -> OK
     }
 
     try {
@@ -106,21 +105,19 @@ module.exports.checkLoggedIn = async (req, res, next) => {
             tokenUser: tokenUser,
             deleted: false,
             status: 'active'
-        }).select("-password").lean();
+        }).select("_id").lean(); // Chỉ cần check sự tồn tại, không cần lấy hết thông tin
 
-        // Nếu đã login -> redirect về trang chủ
+        // Nếu đã login -> Trả về lỗi 403 (Forbidden)
         if (user) {
-            req.flash('info', 'Bạn đã đăng nhập rồi');
-            return res.redirect('/');
+            return forbiddenResponse(res, 'Bạn đã đăng nhập rồi. Vui lòng đăng xuất để thực hiện hành động này.');
         }
         
-        // Token không hợp lệ -> xóa và cho phép tiếp tục
+        // Token không hợp lệ -> Xóa cookie và cho phép tiếp tục
         res.clearCookie("tokenUser");
         next();
     } catch (error) {
-        console.error("Check logged in middleware error:", error);
+        console.error("❌ API checkLoggedIn middleware error:", error);
         res.clearCookie("tokenUser");
         next();
     }
 };
-

@@ -315,9 +315,48 @@ const getFeaturedProducts = async (req, res, next) => {
     }
 };
 
+
+/**
+ * @desc    Get all categories
+ * @route   GET /api/v1/products/categories
+ * @access  Public
+ */
+const getAllCategories = async (req, res, next) => {
+    try {
+        const categories = await ProductCategory.find({
+            deleted: false,
+            status: 'active'
+        })
+            .select('-deleted -deletedBy -updatedBy -__v')
+            .sort({ position: 1 })
+            .lean();
+
+        // (Optional) Nếu muốn đếm số sản phẩm trong mỗi category:
+        // for (const cat of categories) {
+        //     cat.totalProducts = await Product.countDocuments({
+        //         product_category_id: cat._id,
+        //         deleted: false,
+        //         status: 'active'
+        //     });
+        // }
+
+        return ResponseFormatter.success(
+            res,
+            { categories },
+            "Categories retrieved successfully"
+        );
+
+    } catch (error) {
+        console.error("❌ Get categories error:", error);
+        next(new ApiError(500, "Failed to fetch categories"));
+    }
+};
+
+
 module.exports = {
     getAllProducts,
     getProductBySlug,
     getProductsByCategory,
-    getFeaturedProducts
+    getFeaturedProducts,
+    getAllCategories
 };
