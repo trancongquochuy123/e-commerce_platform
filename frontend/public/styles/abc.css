@@ -1,0 +1,35 @@
+.tbpc-row {
+    box-sizing: border-box;
+    flex-flow: row wrap;
+    max-width: 1600px
+}
+
+.tbpc-row,
+.tbpc-row:after,
+.tbpc-row:before {
+    display: flex
+}
+
+.tbpc-col {
+    box-sizing: border-box;
+    max-width: 100%;
+    min-height: 1px;
+    position: relative
+}
+
+.tbpc-col-30 {
+    display: block;
+    flex: 0 0 50%;
+    max-width: 50%
+}
+
+.tbpc-col-horizon-8 {
+    padding-left: 8px;
+    padding-right: 8px
+}
+
+.tbpc-col-15 {
+    display: block;
+    flex: 0 0 25%;
+    max-width: 25%
+}
