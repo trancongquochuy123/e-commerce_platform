@@ -3,6 +3,7 @@ import "../public/styles/main.css";
 import "../public/styles/service.css";
 import { API_URL } from "@/lib/constants";
 import { cookies } from "next/headers";
+import LogoutButton from "./logout-button";
 
 export default async function BaotaoService() {
   let user = null;
@@ -437,31 +438,38 @@ export default async function BaotaoService() {
                   </span>
                 </a>
                 <div className="member-login-btn-container">
-                  <a href="./signup" className="btn-register">
-                    Register
-                  </a>
+                  {user ? (
+                    <LogoutButton className="btn-register" />
+                  ) : (
+                    <a href="./signup" className="btn-register">
+                      Register
+                    </a>
+                  )}
+
                   <span className="divider" />
                   <a href="" className="btn-open">
                     Store setup
                   </a>
                 </div>
               </div>
-              <div className="member-ft member-ft-order">
-                <div
-                  className="member-logout J_UserMemberLogout"
-                  style={{ display: "block" }}
-                >
-                  <div className="login-guide-title">
-                    Log in to Baotao for more.
+              {!user && (
+                <div className="member-ft member-ft-order">
+                  <div
+                    className="member-logout J_UserMemberLogout"
+                    style={{ display: "block" }}
+                  >
+                    <div className="login-guide-title">
+                      Log in to Baotao for more.
+                    </div>
+                    <div className="login-guide-desc">
+                      Better recommendations and easier search.
+                    </div>
+                    <a href="/login" className="btn-login ml1 tb-bg weight">
+                      Login
+                    </a>
                   </div>
-                  <div className="login-guide-desc">
-                    Better recommendations and easier search.
-                  </div>
-                  <a href="/login" className="btn-login ml1 tb-bg weight">
-                    Login
-                  </a>
                 </div>
-              </div>
+              )}
             </div>
             <div className="user-mytao" data-spm="function">
               <div className="mytao-content">
