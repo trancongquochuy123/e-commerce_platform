@@ -294,17 +294,16 @@ export default function ShoppingCart() {
               >
                 Checkout
               </button>
-
-              <p className="text-center text-sm text-gray-600">
-                or{" "}
-                <Link className="text-[#ff5000] hover:underline" href="/">
-                  Continue Shopping →
-                </Link>
-              </p>
             </div>
           </div>
         </div>
       )}
+      <p className="text-center text-sm text-gray-600">
+        {items.length === 0 ? "" : "or"}
+        <Link className="text-[#ff5000] hover:underline" href="/">
+          Continue Shopping →
+        </Link>
+      </p>
     </div>
   );
 }
