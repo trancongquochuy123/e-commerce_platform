@@ -11,6 +11,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import ProductGallery from "@/components/product-gallery";
 
 async function getProduct(slug) {
   try {
@@ -102,33 +103,7 @@ export default async function ProductDetail({ params }) {
 
         <div className="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-2">
           {/* Product Image */}
-          <div className="lg:col-span-1">
-            <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
-              <img
-                src={product.thumbnail}
-                alt={product.title}
-                className="h-full w-full object-cover object-center"
-              />
-            </div>
-
-            {/* Additional Images */}
-            {product.images && product.images.length > 0 && (
-              <div className="mt-4 grid grid-cols-4 gap-4">
-                {product.images.map((image, index) => (
-                  <div
-                    key={index}
-                    className="aspect-square cursor-pointer overflow-hidden rounded-lg bg-gray-100 transition hover:opacity-75"
-                  >
-                    <img
-                      src={image}
-                      alt={`${product.title} ${index + 1}`}
-                      className="h-full w-full object-cover object-center"
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <ProductGallery product={product} />
 
           {/* Product Info */}
           <div className="lg:col-span-1">
