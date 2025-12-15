@@ -12,32 +12,32 @@ export default function ProductGallery({ product }) {
         <img
           src={mainImage}
           alt={product.title}
-          className="max-h-full max-w-full object-contain object-center"
+          className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
         />
       </div>
 
       {galleryImages.length > 0 && (
         <div className="mt-4 grid grid-cols-4 gap-4">
           <div
-            className="flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gray-100 transition hover:opacity-75"
+            className="flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 transition-all hover:border-orange-500"
             onClick={() => setMainImage(product.thumbnail)}
           >
             <img
               src={product.thumbnail}
               alt={product.title}
-              className="max-h-full max-w-full object-contain object-center"
+              className="h-full w-full object-cover"
             />
           </div>
           {galleryImages.map((image, index) => (
             <div
               key={index}
-              className="flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-gray-100 transition hover:opacity-75"
+              className="flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 transition-all hover:border-orange-500"
               onClick={() => setMainImage(image)}
             >
               <img
                 src={image}
                 alt={`${product.title} ${index + 1}`}
-                className="h-full w-full object-cover object-center"
+                className="h-full w-full object-cover"
               />
             </div>
           ))}

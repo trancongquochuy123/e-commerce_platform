@@ -452,7 +452,14 @@ export default async function BaotaoService() {
                   </a>
                 </div>
               </div>
-              {!user && (
+              {user ? (
+                <div className="member-ft member-ft-order">
+                  <div
+                    className="member-logout J_UserMemberLogout"
+                    style={{ display: "block" }}
+                  ></div>
+                </div>
+              ) : (
                 <div className="member-ft member-ft-order">
                   <div
                     className="member-logout J_UserMemberLogout"

@@ -299,7 +299,7 @@ export default function ShoppingCart() {
         </div>
       )}
       <p className="text-center text-sm text-gray-600">
-        {items.length === 0 ? "" : "or"}
+        {items.length === 0 ? "" : "or "}
         <Link className="text-[#ff5000] hover:underline" href="/">
           Continue Shopping →
         </Link>

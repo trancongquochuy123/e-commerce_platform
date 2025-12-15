@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_URL } from "@/lib/constants";
+import { ShoppingCart, ShoppingCartIcon } from "lucide-react";
 
 export default function AddToCartButton({ productId, stock }) {
   const router = useRouter();
@@ -165,7 +166,10 @@ export default function AddToCartButton({ productId, stock }) {
               Adding...
             </span>
           ) : stock > 0 ? (
-            "Add to Cart"
+            <div className="flex gap-3">
+              <ShoppingCart />
+              Add to Cart
+            </div>
           ) : (
             "Out of Stock"
           )}
