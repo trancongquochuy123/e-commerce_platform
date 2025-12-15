@@ -428,7 +428,7 @@ export default async function BaotaoService() {
                 </a>
                 <a
                   className="J_UserMemberNickUrl member-nickurl-horiz"
-                  href="#"
+                  href={user ? "/account/manage" : "#"}
                   target="_self"
                 >
                   <span className="member-nick-info member-nick-info-order">
