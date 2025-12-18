@@ -6,11 +6,11 @@
 
             if role.permissions.includes('products_view') 
                 li
-                    a(href=`/${prefixAdmin}/products`) Sản phẩm
+                    a(href=`/${prefixAdmin}/products`) Danh mục sản phẩm
 
             if role.permissions.includes('categories_view') 
                 li
-                    a(href=`/${prefixAdmin}/products-category`) Danh mục sản phẩm
+                    a(href=`/${prefixAdmin}/products-category`) Phân loại sản phẩm
 
             if role.permissions.includes('roles_view')
                 li
