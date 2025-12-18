@@ -50,11 +50,11 @@ mixin table-tree(records, role, level = 1)
             td
                 if role.permissions.includes('product_category_edit')
                     a(
-                        href=`${prefixAdmin}/products-category/edit/${product._id}`
+                        href=`/${prefixAdmin}/products-category/edit/${product._id}`
                         class="btn btn-edit"
                     ) Edit
                 a(
-                    href=`${prefixAdmin}/products-category/detail/${product._id}`
+                    href=`/${prefixAdmin}/products-category/detail/${product._id}`
                     class="btn btn-secondary"
                 ) Detail
                 if role.permissions.includes('product_category_delete')

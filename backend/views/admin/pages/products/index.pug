@@ -22,12 +22,12 @@ block main
         .row 
             .col-6
                 +form-change-multi(
-                    `${prefixAdmin}/products/change-multi?_method=PATCH`
+                    `/${prefixAdmin}/products/change-multi?_method=PATCH`
                 )
             .col-6.text-end
                 if role.permissions.includes('product_create')
                     a(
-                        href=`${prefixAdmin}/products/create`
+                        href=`/${prefixAdmin}/products/create`
                         class="btn btn-primary"
                     ) Create Products
 
@@ -109,12 +109,12 @@ block main
                         td
                             if role.permissions.includes('product_edit')
                                 a(
-                                    href=`${prefixAdmin}/products/edit/${product._id}`
+                                    href=`/${prefixAdmin}/products/edit/${product._id}`
                                     class="btn btn-edit"
                                 ) Edit
 
                             a(
-                                href=`${prefixAdmin}/products/detail/${product._id}`
+                                href=`/${prefixAdmin}/products/detail/${product._id}`
                                 class="btn btn-secondary"
                             ) Detail
                             if role.permissions.includes('product_delete')
@@ -130,14 +130,14 @@ block main
             id="form-change-status"
             action=""
             method="POST"
-            data-path=`${prefixAdmin}/products/change-status`
+            data-path=`/${prefixAdmin}/products/change-status`
         )
 
         form(
             id="form-delete-item"
             action=""
             method="POST"
-            data-path=`${prefixAdmin}/products/delete`
+            data-path=`/${prefixAdmin}/products/delete`
         )
 
 

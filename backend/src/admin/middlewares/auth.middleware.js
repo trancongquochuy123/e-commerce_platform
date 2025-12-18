@@ -6,7 +6,7 @@ const systemConfig = require("../../../config/system");
 
 module.exports.requireAuth = async (req, res, next) => {
     if (!req.cookies.token) {
-        return res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+        return res.redirect(`/${systemConfig.prefixAdmin}/auth/login`);
     }
 
     try {
@@ -15,7 +15,7 @@ module.exports.requireAuth = async (req, res, next) => {
             .lean();
 
         if (!user) {
-            return res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+            return res.redirect(`/${systemConfig.prefixAdmin}/auth/login`);
         }
 
         const role = await Role.findOne({ _id: user.roleId })
@@ -35,12 +35,12 @@ module.exports.requireAuth = async (req, res, next) => {
             ...role,
             permissions: permissionCodes
         };
-        console.log("User:", user);
+        console.log("User:", user); 
         console.log("Role:", res.locals.role);
 
         next();
     } catch (error) {
         console.error("Auth middleware error:", error);
-        return res.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+        return res.redirect(`/${systemConfig.prefixAdmin}/auth/login`);
     }
 };

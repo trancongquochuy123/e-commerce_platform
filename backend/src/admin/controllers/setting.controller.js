@@ -32,7 +32,7 @@ module.exports.generalPost = async (req, res) => {
         settings.email = email;
         settings.copyright = copyright;
         await settings.save();
-        res.redirect(`${systemConfig.prefixAdmin}/settings/general`);
+        res.redirect(`/${systemConfig.prefixAdmin}/settings/general`);
     } catch (error) {
         console.error(error);
         res.status(500).send("Internal Server Error");

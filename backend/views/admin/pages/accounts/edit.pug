@@ -11,7 +11,7 @@ block main
         .card.shadow-lg.border-0.rounded-3
             .card-body.p-4
                 form(
-                    action=`${prefixAdmin}/accounts/edit/${account._id}?_method=PATCH`
+                    action=`/${prefixAdmin}/accounts/edit/${account._id}?_method=PATCH`
                     method="POST"
                     enctype="multipart/form-data"
                 )

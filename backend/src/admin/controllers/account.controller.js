@@ -55,7 +55,7 @@ module.exports.createAccount = async (req, res) => {
 
         if (existingAccount) {
             req.flash("error", "Email already exists");
-            return res.redirect(`${systemConfig.prefixAdmin}/accounts/create`);
+            return res.redirect(`/${systemConfig.prefixAdmin}/accounts/create`);
         }
         // Validate and create the account
         const newAccount = new Account({
@@ -70,11 +70,11 @@ module.exports.createAccount = async (req, res) => {
 
         await newAccount.save();
 
-        res.redirect(`${systemConfig.prefixAdmin}/accounts`);
+        res.redirect(`/${systemConfig.prefixAdmin}/accounts`);
     } catch (error) {
         console.error("Error creating account:", error);
         req.flash("error", "An error occurred while creating the account");
-        res.redirect(`${systemConfig.prefixAdmin}/accounts/create`);
+        res.redirect(`/${systemConfig.prefixAdmin}/accounts/create`);
     }
 }
 
@@ -86,7 +86,7 @@ module.exports.edit = async (req, res) => {
 
     if (!account) {
         req.flash("error", "Account not found");
-        return res.redirect(`${systemConfig.prefixAdmin}/accounts`);
+        return res.redirect(`/${systemConfig.prefixAdmin}/accounts`);
     }
 
     const roles = await Role.find({ deleted: false });
@@ -116,7 +116,7 @@ module.exports.editAccount = async (req, res) => {
 
         if (existingEmail && existingEmail._id.toString() !== id) {
             req.flash("error", "Email already exists");
-            return res.redirect(`${systemConfig.prefixAdmin}/accounts/${id}/edit`);
+            return res.redirect(`/${systemConfig.prefixAdmin}/accounts/${id}/edit`);
         }
 
         account.fullName = fullName;
@@ -133,10 +133,10 @@ module.exports.editAccount = async (req, res) => {
         await account.save();
 
         req.flash("success", "Account updated successfully");
-        res.redirect(`${systemConfig.prefixAdmin}/accounts`);
+        res.redirect(`/${systemConfig.prefixAdmin}/accounts`);
     } catch (error) {
         console.error("Error updating account:", error);
         req.flash("error", "An error occurred while updating the account");
-        res.redirect(`${systemConfig.prefixAdmin}/accounts/${id}/edit`);
+        res.redirect(`/${systemConfig.prefixAdmin}/accounts/${id}/edit`);
     }
 }

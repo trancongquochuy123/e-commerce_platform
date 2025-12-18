@@ -14,7 +14,7 @@ block main
 
           .card-body
             form(
-              action=`${prefixAdmin}/my-account/edit?_method=PATCH`
+              action=`/${prefixAdmin}/my-account/edit?_method=PATCH`
               method="POST" 
               enctype="multipart/form-data")
               .mb-3
@@ -46,7 +46,7 @@ block main
                   img.mt-3(src=`${user.avatar}` alt="Avatar" style="max-width: 150px; max-height: 150px; object-fit: cover; border-radius: 8px;")
 
               .d-flex.justify-content-between.mt-4
-                a.btn.btn-secondary(href=`${prefixAdmin}/my-account`) Quay lại
+                a.btn.btn-secondary(href=`/${prefixAdmin}/my-account`) Quay lại
                 button.btn.btn-success(type="submit")
                   i.fa.fa-save.me-2
                   | Lưu thay đổi

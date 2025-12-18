@@ -37,7 +37,7 @@ module.exports.editPatch = async (req, res) => {
 
         if (existingEmail) {
             req.flash("error", "Email đã tồn tại");
-            return res.redirect(`${systemConfig.prefixAdmin}/my-account/edit`);
+            return res.redirect(`/${systemConfig.prefixAdmin}/my-account/edit`);
         }
 
         // Update password nếu có nhập
@@ -55,10 +55,10 @@ module.exports.editPatch = async (req, res) => {
         await account.save();
 
         req.flash("success", "Cập nhật tài khoản thành công");
-        res.redirect(`${systemConfig.prefixAdmin}/my-account/edit`);
+        res.redirect(`/${systemConfig.prefixAdmin}/my-account/edit`);
     } catch (error) {
         console.error("Error updating account:", error);
         req.flash("error", "Có lỗi khi cập nhật tài khoản");
-        res.redirect(`${systemConfig.prefixAdmin}/my-account/edit`);
+        res.redirect(`/${systemConfig.prefixAdmin}/my-account/edit`);
     }
 }

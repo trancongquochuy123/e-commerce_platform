@@ -35,7 +35,7 @@ module.exports.createRole = async (req, res) => {
         // Validate input
         if (!title) {
             req.flash('error', 'Title is required');
-            return res.redirect(`${systemConfig.prefixAdmin}/roles/create`);
+            return res.redirect(`/${systemConfig.prefixAdmin}/roles/create`);
         }
 
         // Create new role
@@ -47,11 +47,11 @@ module.exports.createRole = async (req, res) => {
         await newRole.save();
 
         req.flash('success', 'Role created successfully');
-        return res.redirect(`${systemConfig.prefixAdmin}/roles`);
+        return res.redirect(`/${systemConfig.prefixAdmin}/roles`);
     } catch (error) {
         console.error("Error creating role:", error);
         req.flash('error', 'An error occurred while creating the role');
-        return res.redirect(`${systemConfig.prefixAdmin}/roles/create`);
+        return res.redirect(`/${systemConfig.prefixAdmin}/roles/create`);
     }
 };
 
@@ -68,7 +68,7 @@ module.exports.edit = async (req, res) => {
 
         if (!data) {
             req.flash('error', 'Role not found!');
-            return res.redirect(`${systemConfig.prefixAdmin}/roles`);
+            return res.redirect(`/${systemConfig.prefixAdmin}/roles`);
         }
 
         res.render("admin/pages/roles/edit.pug", {
@@ -79,7 +79,7 @@ module.exports.edit = async (req, res) => {
     } catch (error) {
         console.error("❌  [ERROR in edit controller]", error);
         req.flash('error', 'An error occurred while loading edit page.');
-        res.redirect(`${systemConfig.prefixAdmin}/roles`); // redirect về trang danh sách sản phẩm
+        res.redirect(`/${systemConfig.prefixAdmin}/roles`); // redirect về trang danh sách sản phẩm
     }
 };
 
@@ -95,7 +95,7 @@ module.exports.editPatch = async (req, res) => {
         const data = await Role.findOne(find);
         if (!data) {
             req.flash('error', 'Role not found!');
-            return res.redirect(`${systemConfig.prefixAdmin}/roles`);
+            return res.redirect(`/${systemConfig.prefixAdmin}/roles`);
         }
 
         const { title, description } = req.body;
@@ -108,23 +108,24 @@ module.exports.editPatch = async (req, res) => {
         await Role.updateOne(find, roleData);
 
         req.flash('success', 'Update Role successfully!');
-        res.redirect(`${systemConfig.prefixAdmin}/roles`);
+        res.redirect(`/${systemConfig.prefixAdmin}/roles`);
     } catch (error) {
         console.error("❌  [ERROR in editPatch controller]", error);
         req.flash('error', 'An error occurred while updating the role.');
-        res.redirect(`${systemConfig.prefixAdmin}/roles`);
+        res.redirect(`/${systemConfig.prefixAdmin}/roles`);
     }
 };
 // [GET] admin/roles/detail/:id
 module.exports.detail = async (req, res) => {
     try {
+      
         const id = req.params.id;
         const find = { _id: id, deleted: false };
 
         const data = await Role.findOne(find);
         if (!data) {
             req.flash('error', 'Role not found!');
-            return res.redirect(`${systemConfig.prefixAdmin}/roles`);
+            return res.redirect(`/${systemConfig.prefixAdmin}/roles`);
         }
 
         res.render("admin/pages/roles/detail.pug", {
@@ -135,7 +136,7 @@ module.exports.detail = async (req, res) => {
     } catch (error) {
         console.error("❌  [ERROR in detail controller]", error);
         req.flash('error', 'An error occurred while loading Role details.');
-        res.redirect(`${systemConfig.prefixAdmin}/roles`);
+        res.redirect(`/${systemConfig.prefixAdmin}/roles`);
     }
 };
 
@@ -151,11 +152,11 @@ module.exports.deleteRole = async (req, res) => {
 
         req.flash('success', 'Delete role successfully!');
 
-        res.redirect(req.get('referer') || `${systemConfig.prefixAdmin}/roles`);
+        res.redirect(req.get('referer') || `/${systemConfig.prefixAdmin}/roles`);
     } catch (error) {
         console.error("Error in delete item:", error);
         req.flash('error', 'An error occurred while deleting the role.');
-        res.redirect(req.get('referer') || `${systemConfig.prefixAdmin}/roles`);
+        res.redirect(req.get('referer') || `/${systemConfig.prefixAdmin}/roles`);
     }
 }
 
@@ -183,7 +184,7 @@ module.exports.permissions = async (req, res) => {
   } catch (error) {
     console.error('❌  [ERROR in permission controller]', error);
     req.flash('error', 'An error occurred while loading Role Permissions.');
-    res.redirect(`${systemConfig.prefixAdmin}/roles`);
+    res.redirect(`/${systemConfig.prefixAdmin}/roles`);
   }
 };
 
@@ -215,12 +216,12 @@ module.exports.updatePermissions = async (req, res) => {
     }
     
     req.flash('success', 'Cập nhật phân quyền thành công!');
-    res.redirect(`${systemConfig.prefixAdmin}/roles/permissions`);
+    res.redirect(`/${systemConfig.prefixAdmin}/roles/permissions`);
     
   } catch (error) {
     console.error('❌ [ERROR in updatePermissions controller]', error);
     req.flash('error', 'Có lỗi xảy ra khi cập nhật phân quyền!');
-    res.redirect(`${systemConfig.prefixAdmin}/roles/permissions`);
+    res.redirect(`/${systemConfig.prefixAdmin}/roles/permissions`);
   }
 };
 
@@ -232,7 +233,7 @@ module.exports.updatePermissionsAdvanced = async (req, res) => {
     // Validation: Kiểm tra permissions có tồn tại
     if (!permissions || typeof permissions !== 'object') {
       req.flash('error', 'Dữ liệu phân quyền không hợp lệ!');
-      return res.redirect(`${systemConfig.prefixAdmin}/roles/permissions`);
+      return res.redirect(`/${systemConfig.prefixAdmin}/roles/permissions`);
     }
     
     // Lấy tất cả permissions hợp lệ từ database
@@ -286,12 +287,12 @@ module.exports.updatePermissionsAdvanced = async (req, res) => {
     });
     
     req.flash('success', `Cập nhật phân quyền thành công cho ${updateResults.filter(r => r.updated).length} vai trò!`);
-    res.redirect(`${systemConfig.prefixAdmin}/roles/permissions`);
+    res.redirect(`/${systemConfig.prefixAdmin}/roles/permissions`);
     
   } catch (error) {
     console.error('❌ [ERROR in updatePermissions controller]', error);
     req.flash('error', 'Có lỗi xảy ra khi cập nhật phân quyền!');
-    res.redirect(`${systemConfig.prefixAdmin}/roles/permissions`);
+    res.redirect(`/${systemConfig.prefixAdmin}/roles/permissions`);
   }
 };
 
@@ -343,12 +344,12 @@ module.exports.updatePermissionsWithTransaction = async (req, res) => {
     });
     
     req.flash('success', 'Cập nhật phân quyền thành công!');
-    res.redirect(`${systemConfig.prefixAdmin}/roles/permissions`);
+    res.redirect(`/${systemConfig.prefixAdmin}/roles/permissions`);
     
   } catch (error) {
     console.error('❌ [ERROR in updatePermissions controller]', error);
     req.flash('error', error.message || 'Có lỗi xảy ra khi cập nhật phân quyền!');
-    res.redirect(`${systemConfig.prefixAdmin}/roles/permissions`);
+    res.redirect(`/${systemConfig.prefixAdmin}/roles/permissions`);
   } finally {
     await session.endSession();
   }

@@ -5,7 +5,7 @@ var md5 = require('md5');
 // [GET] admin/dashboard
 module.exports.login = (req, res) => {
     if (req.cookies.token) {
-        return res.redirect(`${systemConfig.prefixAdmin}/dashboard`);
+        return res.redirect(`/${systemConfig.prefixAdmin}/dashboard`);
     } else {
         res.render("admin/pages/auth/login.pug", {
             pageTitle: "Login page",
@@ -25,7 +25,7 @@ module.exports.loginPost = async (req, res) => {
 
     if (!user) {
         req.flash("error", "Invalid email");
-        return r/es.redirect(`${systemConfig.prefixAdmin}/auth/login`);
+        return res.redirect(`/${systemConfig.prefixAdmin}/auth/login`);
     }
 
     const hashedPassword = md5(password);
@@ -46,7 +46,7 @@ module.exports.loginPost = async (req, res) => {
         maxAge: 24 * 60 * 60 * 1000, // thời gian sống cookie (ví dụ 1 ngày)
     });
 
-    res.redirect(`${systemConfig.prefixAdmin}/dashboard`);
+    res.redirect(`/${systemConfig.prefixAdmin}/dashboard`);
 }
 
 // [GET] admin/auth/logout

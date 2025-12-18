@@ -38,7 +38,7 @@ module.exports.index = async (req, res) => {
     } catch (error) {
         console.error("Error in products-category index:", error);
         req.flash('error', 'An error occurred while loading product categories.');
-        res.redirect(`${systemConfig.prefixAdmin}/products-category`);
+        res.redirect(`/${systemConfig.prefixAdmin}/products-category`);
     }
 }
 
@@ -61,7 +61,7 @@ module.exports.create = async (req, res) => {
     } catch (error) {
         console.error("Error in products-category create page:", error);
         req.flash('error', 'An error occurred while loading create page.');
-        res.redirect(`${systemConfig.prefixAdmin}/products-category`);
+        res.redirect(`/${systemConfig.prefixAdmin}/products-category`);
     }
 }
 
@@ -96,11 +96,11 @@ module.exports.createProduct = async (req, res) => {
         await record.save();
 
         req.flash('success', 'Create product category successfully!');
-        res.redirect(`${systemConfig.prefixAdmin}/products-category`); // redirect về trang danh sách sản phẩm
+        res.redirect(`/${systemConfig.prefixAdmin}/products-category`); // redirect về trang danh sách sản phẩm
     } catch (error) {
         console.error("❌  [ERROR in createProduct controller]", error);
         req.flash('error', 'An error occurred while creating the product category.');
-        res.redirect(`${systemConfig.prefixAdmin}/products-category`);
+        res.redirect(`/${systemConfig.prefixAdmin}/products-category`);
     }
 }
 
@@ -117,7 +117,7 @@ module.exports.edit = async (req, res) => {
 
         if (!data) {
             req.flash('error', 'Product category not found!');
-            return res.redirect(`${systemConfig.prefixAdmin}/products-category`);
+            return res.redirect(`/${systemConfig.prefixAdmin}/products-category`);
         }
 
         let findProducts = {
@@ -137,7 +137,7 @@ module.exports.edit = async (req, res) => {
     } catch (error) {
         console.error("❌  [ERROR in edit controller]", error);
         req.flash('error', 'An error occurred while loading edit page.');
-        res.redirect(`${systemConfig.prefixAdmin}/products-category`); // redirect về trang danh sách sản phẩm
+        res.redirect(`/${systemConfig.prefixAdmin}/products-category`); // redirect về trang danh sách sản phẩm
     }
 };
 
@@ -153,7 +153,7 @@ module.exports.editPatch = async (req, res) => {
         const data = await ProductCategory.findOne(find);
         if (!data) {
             req.flash('error', 'Product category not found!');
-            return res.redirect(`${systemConfig.prefixAdmin}/products-category`);
+            return res.redirect(`/${systemConfig.prefixAdmin}/products-category`);
         }
 
         const { title, parent_id, description, images, thumbnail, status, position } = req.body;
@@ -183,11 +183,11 @@ module.exports.editPatch = async (req, res) => {
         await ProductCategory.updateOne(find, categoryData);
 
         req.flash('success', 'Update product category successfully!');
-        res.redirect(`${systemConfig.prefixAdmin}/products-category`);
+        res.redirect(`/${systemConfig.prefixAdmin}/products-category`);
     } catch (error) {
         console.error("❌  [ERROR in editPatch controller]", error);
         req.flash('error', 'An error occurred while updating the product category.');
-        res.redirect(`${systemConfig.prefixAdmin}/products-category`);
+        res.redirect(`/${systemConfig.prefixAdmin}/products-category`);
     }
 };
 
@@ -200,7 +200,7 @@ module.exports.detail = async (req, res) => {
     const data = await ProductCategory.findOne(find);
     if (!data) {
       req.flash('error', 'Product category not found!');
-      return res.redirect(`${systemConfig.prefixAdmin}/products-category`);
+      return res.redirect(`/${systemConfig.prefixAdmin}/products-category`);
     }
 
     // thêm đoạn load tất cả category để tìm parent
@@ -217,7 +217,7 @@ module.exports.detail = async (req, res) => {
   } catch (error) {
     console.error("❌  [ERROR in detail controller]", error);
     req.flash('error', 'An error occurred while loading product category details.');
-    res.redirect(`${systemConfig.prefixAdmin}/products-category`);
+    res.redirect(`/${systemConfig.prefixAdmin}/products-category`);
   }
 };
 
@@ -233,10 +233,10 @@ module.exports.deleteItem = async (req, res) => {
 
         req.flash('success', 'Delete product category successfully!');
 
-        res.redirect(req.get('referer') || `${systemConfig.prefixAdmin}/products-category`);
+        res.redirect(req.get('referer') || `/${systemConfig.prefixAdmin}/products-category`);
     } catch (error) {
         console.error("Error in delete item:", error);
         req.flash('error', 'An error occurred while deleting the product category.');
-        res.redirect(req.get('referer') || `${systemConfig.prefixAdmin}/products-category`);
+        res.redirect(req.get('referer') || `/${systemConfig.prefixAdmin}/products-category`);
     }
 }

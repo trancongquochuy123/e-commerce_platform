@@ -91,11 +91,11 @@ app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 // ======================
 // LOGGING
 // ======================
-if (process.env.NODE_ENV === 'development') {
-    app.use(morgan('dev'));
-} else {
-    app.use(morgan('combined'));
-}
+// if (process.env.NODE_ENV === 'development') {
+//     app.use(morgan('dev'));
+// } else {
+//     app.use(morgan('combined'));
+// }
 
 // ======================
 // STATIC FILES

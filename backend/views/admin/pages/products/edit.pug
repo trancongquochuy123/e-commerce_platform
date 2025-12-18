@@ -12,7 +12,7 @@ block main
         +alert-error(5000)
 
         form(
-            action=`${prefixAdmin}/products/edit/${product._id}?_method=PATCH`
+            action=`/${prefixAdmin}/products/edit/${product._id}?_method=PATCH`
             method="POST"
             id="form-edit-product"
             enctype="multipart/form-data"

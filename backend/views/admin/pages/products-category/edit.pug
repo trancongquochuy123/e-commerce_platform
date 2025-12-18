@@ -8,7 +8,7 @@ block main
         +alert-error(5000)
 
         form(
-            action=`${prefixAdmin}/products-category/edit/${record._id}?_method=PATCH`
+            action=`/${prefixAdmin}/products-category/edit/${record._id}?_method=PATCH`
             method="POST"
             enctype="multipart/form-data"
         )
