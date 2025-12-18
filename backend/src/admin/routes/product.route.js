@@ -29,31 +29,31 @@ const upload = multer({
 /**
  * @route   GET /api/v1/admin/products
  * @desc    Get all products with filters
- * @access  Private (product_view permission)
+ * @access  Private (products_view permission)
  * @query   ?page=1&limit=20&status=active&keyword=search&category=id
  */
 router.get('/', 
-    permission.requirePermission('product_view'),
+    permission.requirePermission('products_view'),
     productController.getAllProducts
 );
 
 /**
  * @route   GET /api/v1/admin/products/:id
  * @desc    Get single product details
- * @access  Private (product_view permission)
+ * @access  Private (products_view permission)
  */
 router.get('/:id',
-    permission.requirePermission('product_view'),
+    permission.requirePermission('products_view'),
     productController.getProductById
 );
 
 /**
  * @route   POST /api/v1/admin/products
  * @desc    Create new product
- * @access  Private (product_create permission)
+ * @access  Private (products_create permission)
  */
 router.post('/',
-    permission.requirePermission('product_create'),
+    permission.requirePermission('products_create'),
     upload.single('thumbnail'),
     uploadCloudinary('products/thumbnails'),
     productValidator.createProduct,
@@ -63,10 +63,10 @@ router.post('/',
 /**
  * @route   PUT /api/v1/admin/products/:id
  * @desc    Update product (full update)
- * @access  Private (product_edit permission)
+ * @access  Private (products_edit permission)
  */
 router.put('/:id',
-    permission.requirePermission('product_edit'),
+    permission.requirePermission('products_edit'),
     upload.single('thumbnail'),
     uploadCloudinary('products/thumbnails'),
     productValidator.updateProduct,
@@ -76,10 +76,10 @@ router.put('/:id',
 /**
  * @route   PATCH /api/v1/admin/products/:id
  * @desc    Update product (partial update)
- * @access  Private (product_edit permission)
+ * @access  Private (products_edit permission)
  */
 router.patch('/:id',
-    permission.requirePermission('product_edit'),
+    permission.requirePermission('products_edit'),
     upload.single('thumbnail'),
     uploadCloudinary('products/thumbnails'),
     productValidator.updateProduct,
@@ -89,10 +89,10 @@ router.patch('/:id',
 /**
  * @route   PATCH /api/v1/admin/products/:id/status
  * @desc    Change product status (active/inactive)
- * @access  Private (product_edit permission)
+ * @access  Private (products_edit permission)
  */
 router.patch('/:id/status',
-    permission.requirePermission('product_edit'),
+    permission.requirePermission('products_edit'),
     productValidator.changeStatus,
     productController.changeStatus
 );
@@ -100,10 +100,10 @@ router.patch('/:id/status',
 /**
  * @route   POST /api/v1/admin/products/bulk-action
  * @desc    Bulk actions (change status, delete multiple products)
- * @access  Private (product_edit permission)
+ * @access  Private (products_edit permission)
  */
 router.post('/bulk-action',
-    permission.requirePermission('product_edit'),
+    permission.requirePermission('products_edit'),
     productValidator.bulkAction,
     productController.bulkAction
 );
@@ -111,10 +111,10 @@ router.post('/bulk-action',
 /**
  * @route   PATCH /api/v1/admin/products/:id/position
  * @desc    Change product position
- * @access  Private (product_edit permission)
+ * @access  Private (products_edit permission)
  */
 router.patch('/:id/position',
-    permission.requirePermission('product_edit'),
+    permission.requirePermission('products_edit'),
     productValidator.changePosition,
     productController.changePosition
 );
@@ -122,30 +122,30 @@ router.patch('/:id/position',
 /**
  * @route   PATCH /api/v1/admin/products/:id/feature
  * @desc    Toggle product featured status
- * @access  Private (product_edit permission)
+ * @access  Private (products_edit permission)
  */
 router.patch('/:id/feature',
-    permission.requirePermission('product_edit'),
+    permission.requirePermission('products_edit'),
     productController.toggleFeature
 );
 
 /**
  * @route   DELETE /api/v1/admin/products/:id
  * @desc    Soft delete product
- * @access  Private (product_delete permission)
+ * @access  Private (products_delete permission)
  */
 router.delete('/:id',
-    permission.requirePermission('product_delete'),
+    permission.requirePermission('products_delete'),
     productController.deleteProduct
 );
 
 /**
  * @route   DELETE /api/v1/admin/products/:id/permanent
  * @desc    Permanently delete product
- * @access  Private (product_delete permission + super admin)
+ * @access  Private (products_delete permission + super admin)
  */
 router.delete('/:id/permanent',
-    permission.requirePermission('product_delete'),
+    permission.requirePermission('products_delete'),
     permission.isSuperAdmin,
     productController.permanentDeleteProduct
 );
@@ -153,20 +153,20 @@ router.delete('/:id/permanent',
 /**
  * @route   PATCH /api/v1/admin/products/:id/restore
  * @desc    Restore deleted product
- * @access  Private (product_edit permission)
+ * @access  Private (products_edit permission)
  */
 router.patch('/:id/restore',
-    permission.requirePermission('product_edit'),
+    permission.requirePermission('products_edit'),
     productController.restoreProduct
 );
 
 // /**
 //  * @route   GET /api/v1/admin/products/:id/stock-history
 //  * @desc    Get product stock history
-//  * @access  Private (product_view permission)
+//  * @access  Private (products_view permission)
 //  */
 // router.get('/:id/stock-history',
-//     permission.requirePermission('product_view'),
+//     permission.requirePermission('products_view'),
 //     productController.getStockHistory
 // );
 

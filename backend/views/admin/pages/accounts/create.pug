@@ -3,7 +3,7 @@ include ../../mixins/alert.pug
 include ../../mixins/select-tree.pug
 
 block main
-    if (role.permissions.includes('account_create'))
+    if (role.permissions.includes('accounts_create'))
         h1.mb-4.text-primary Create Account
         +alert-success(5000)
         +alert-error(5000)
