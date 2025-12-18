@@ -1,8 +1,9 @@
 .sider
     nav.menu
         ul
-            li
-                a(href=`/${prefixAdmin}/dashboard`) Trang chủ
+            if role.permissions.includes('dashboard_view') 
+                li
+                    a(href=`/${prefixAdmin}/dashboard`) Trang chủ
 
             if role.permissions.includes('products_view') 
                 li
@@ -23,5 +24,7 @@
             if role.permissions.includes('accounts_view') 
                 li
                     a(href=`/${prefixAdmin}/accounts`) Danh sách tài khoản
-            li
-                a(href=`/${prefixAdmin}/settings/general`) Cài đặt chung
+
+            if role.permissions.includes('settings_view') 
+                li
+                    a(href=`/${prefixAdmin}/settings/general`) Cài đặt chung

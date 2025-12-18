@@ -501,15 +501,15 @@ const deleteProduct = async (req, res) => {
 
     if (!product) {
       req.flash("error", "Product not found!");
-      return res.redirect("back");
+      return res.redirect("/admin/products");
     }
 
     req.flash("success", "Product deleted successfully!");
-    res.redirect("back");
+    res.redirect("/admin/products");
   } catch (error) {
     console.error("❌ Delete product error:", error);
     req.flash("error", "An error occurred while deleting the product.");
-    res.redirect("back");
+    res.redirect("/admin/products");
   }
 };
 
