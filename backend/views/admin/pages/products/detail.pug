@@ -2,7 +2,7 @@ extends ../../layout/default.pug
 include ../../mixins/alert.pug
 
 block main
-    if role.permissions.includes('product_view') 
+    if role.permissions.includes('products_view') 
         .container
             h1 Product Detail - #{product.title}
 

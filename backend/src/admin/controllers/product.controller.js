@@ -9,7 +9,7 @@ const { priceNewProduct } = require("../../utils/products");
 /**
  * @desc    Get all products with filters, search, pagination
  * @route   GET /api/v1/admin/products
- * @access  Private (product_view)
+ * @access  Private (products_view)
  */
 const getAllProducts = async (req, res, next) => {
     try {
@@ -123,7 +123,7 @@ const getAllProducts = async (req, res, next) => {
 /**
  * @desc    Get single product by ID
  * @route   GET /api/v1/admin/products/:id
- * @access  Private (product_view)
+ * @access  Private (products_view)
  */
 const getProductById = async (req, res, next) => {
     try {
@@ -245,7 +245,7 @@ const createProduct = async (req, res, next) => {
 /**
  * @desc    Update product (partial update)
  * @route   PATCH /api/v1/admin/products/:id
- * @access  Private (product_edit)
+ * @access  Private (products_edit)
  */
 const patchProduct = async (req, res, next) => {
     try {
@@ -318,7 +318,7 @@ const patchProduct = async (req, res, next) => {
 /**
  * @desc    Change product status
  * @route   PATCH /api/v1/admin/products/:id/status
- * @access  Private (product_edit)
+ * @access  Private (products_edit)
  */
 const changeStatus = async (req, res, next) => {
     try {
@@ -365,7 +365,7 @@ const changeStatus = async (req, res, next) => {
 /**
  * @desc    Bulk actions on products
  * @route   POST /api/v1/admin/products/bulk-action
- * @access  Private (product_edit)
+ * @access  Private (products_edit)
  */
 const bulkAction = async (req, res, next) => {
     try {
@@ -448,7 +448,7 @@ const bulkAction = async (req, res, next) => {
 /**
  * @desc    Change product position
  * @route   PATCH /api/v1/admin/products/:id/position
- * @access  Private (product_edit)
+ * @access  Private (products_edit)
  */
 const changePosition = async (req, res, next) => {
     try {
@@ -491,7 +491,7 @@ const changePosition = async (req, res, next) => {
 /**
  * @desc    Toggle featured status
  * @route   PATCH /api/v1/admin/products/:id/feature
- * @access  Private (product_edit)
+ * @access  Private (products_edit)
  */
 const toggleFeature = async (req, res, next) => {
     try {
@@ -536,7 +536,7 @@ const toggleFeature = async (req, res, next) => {
 /**
  * @desc    Soft delete product
  * @route   DELETE /api/v1/admin/products/:id
- * @access  Private (product_delete)
+ * @access  Private (products_delete)
  */
 const deleteProduct = async (req, res, next) => {
     try {
@@ -579,7 +579,7 @@ const deleteProduct = async (req, res, next) => {
 /**
  * @desc    Restore deleted product
  * @route   PATCH /api/v1/admin/products/:id/restore
- * @access  Private (product_edit)
+ * @access  Private (products_edit)
  */
 const restoreProduct = async (req, res, next) => {
     try {
@@ -622,7 +622,7 @@ const restoreProduct = async (req, res, next) => {
 /**
  * @desc    Permanently delete product
  * @route   DELETE /api/v1/admin/products/:id/permanent
- * @access  Private (product_delete + super admin)
+ * @access  Private (products_delete + super admin)
  */
 const permanentDeleteProduct = async (req, res, next) => {
     try {

@@ -4,7 +4,7 @@
             li
                 a(href=`${prefixAdmin}/dashboard`) Trang chủ
 
-            if role.permissions.includes('product_view') 
+            if role.permissions.includes('products_view') 
                 li
                     a(href=`${prefixAdmin}/products`) Sản phẩm
 
@@ -16,11 +16,11 @@
                 li
                     a(href=`${prefixAdmin}/roles`) Danh mục vai trò
 
-            if role.permissions.includes('roles_permission') 
+            if role.permissions.includes('roles_permissions') 
                 li    
                     a(href=`${prefixAdmin}/roles/permissions`) Phân quyền
 
-            if role.permissions.includes('account_view') 
+            if role.permissions.includes('accounts_view') 
                 li
                     a(href=`${prefixAdmin}/accounts`) Danh sách tài khoản
             li
