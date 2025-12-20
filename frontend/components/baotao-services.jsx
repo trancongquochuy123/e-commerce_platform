@@ -447,7 +447,7 @@ export default async function BaotaoService() {
                   )}
 
                   <span className="divider" />
-                  <a href="" className="btn-open">
+                  <a href="/store-setup" className="btn-open">
                     Store setup
                   </a>
                 </div>
