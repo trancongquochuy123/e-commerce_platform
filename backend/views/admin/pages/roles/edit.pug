@@ -8,7 +8,7 @@ block main
         +alert-error(5000)
 
         form(
-            action=`${prefixAdmin}/roles/edit/${record._id}?_method=PATCH`
+            action=`/${prefixAdmin}/roles/edit/${record._id}?_method=PATCH`
             method="POST"
             class="form"
         )
@@ -24,4 +24,4 @@ block main
                 label.form-label(for="description") Mô tả ngắn
                 textarea.form-control(name="description" id="description") #{record.description || ''}
             button.btn.btn-primary(type="submit") Cập nhật
-            a.btn.btn-secondary(href=`${prefixAdmin}/roles`) Quay lại
+            a.btn.btn-secondary(href=`/${prefixAdmin}/roles`) Quay lại

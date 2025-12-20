@@ -11,7 +11,7 @@ const Logo = () => (
 );
 
 const SearchBar = () => (
-  <div className="order-3 flex w-full max-w-[600px] flex-1 gap-2 rounded-xl border-2 border-[#ff5000] p-[0.15rem] md:order-0 md:w-auto lg:max-w-[800px]">
+  <div className="flex w-full max-w-[600px] flex-1 gap-2 rounded-xl border-2 border-[#ff5000] p-[0.15rem] md:order-0 md:w-auto lg:max-w-[800px]">
     <Input
       type="text"
       placeholder="Search for products..."
@@ -53,7 +53,7 @@ export default function Header() {
         <Logo />
         <SearchBar />
         {/* <UserActions /> */}
-        <CartIcon itemCount={0} />
+        <CartIcon />
       </div>
     </header>
   );

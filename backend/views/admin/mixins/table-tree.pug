@@ -2,7 +2,7 @@ mixin table-tree(records, role, level = 1)
     each product, index in records
         - const prefix = Array(level + 1).join('-- '); // tạo indent cho tree
         tr
-            if role.permissions.includes('product_category_delete') || role.permissions.includes('product_category_edit')
+            if role.permissions.includes('categories_delete') || role.permissions.includes('categories_edit')
                 td 
                     input(
                         type="checkbox"
@@ -22,10 +22,10 @@ mixin table-tree(records, role, level = 1)
                     value=product.position
                     min=1
                     name="position"
-                    readonly=!role.permissions.includes('product_category_edit')
+                    readonly=!role.permissions.includes('categories_edit')
                 )
             td
-                if role.permissions.includes('product_category_edit')
+                if role.permissions.includes('categories_edit')
                     if product.status == 'active'
                         a(
                             href="javascript:;"
@@ -48,16 +48,16 @@ mixin table-tree(records, role, level = 1)
                     else
                         span.out-of-stock Inactive
             td
-                if role.permissions.includes('product_category_edit')
+                if role.permissions.includes('categories_edit')
                     a(
-                        href=`${prefixAdmin}/products-category/edit/${product._id}`
+                        href=`/${prefixAdmin}/products-category/edit/${product._id}`
                         class="btn btn-edit"
                     ) Edit
                 a(
-                    href=`${prefixAdmin}/products-category/detail/${product._id}`
+                    href=`/${prefixAdmin}/products-category/detail/${product._id}`
                     class="btn btn-secondary"
                 ) Detail
-                if role.permissions.includes('product_category_delete')
+                if role.permissions.includes('categories_delete')
                     button(
                         class="btn btn-delete"
                         data-id=product._id

@@ -8,7 +8,7 @@ block main
     +alert-error(5000)
 
     form(
-        action=`${prefixAdmin}/auth/login`
+        action=`/${prefixAdmin}/auth/login`
         method="POST"
         class="mx-auto p-4 shadow rounded bg-light"
         style="max-width: 400px;"
@@ -25,4 +25,4 @@ block main
             button.btn.btn-primary.w-100(type="submit") Log In
 
         .text-center.mt-3
-            a(href=`${prefixAdmin}/auth/forgot-password`) Forgot password?
+            a(href=`/${prefixAdmin}/auth/forgot-password`) Forgot password?

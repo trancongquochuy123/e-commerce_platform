@@ -11,7 +11,7 @@ block main
         .row 
             .col-6.text-end
                 a(
-                    href=`${prefixAdmin}/roles/create`
+                    href=`/${prefixAdmin}/roles/create`
                     class="btn btn-primary"
                 ) Create roles
 
@@ -36,12 +36,12 @@ block main
                             td #{role.description}
                             td
                                 a(
-                                    href=`${prefixAdmin}/roles/edit/${role._id}`
+                                    href=`/${prefixAdmin}/roles/edit/${role._id}`
                                     class="btn btn-edit"
                                 ) Edit
 
                                 a(
-                                    href=`${prefixAdmin}/roles/detail/${role._id}`
+                                    href=`/${prefixAdmin}/roles/detail/${role._id}`
                                     class="btn btn-secondary"
                                 ) Detail
 
@@ -58,7 +58,7 @@ block main
             id="form-delete-item"
             action=""
             method="POST"
-            data-path=`${prefixAdmin}/roles/delete`
+            data-path=`/${prefixAdmin}/roles/delete`
         )
 
 

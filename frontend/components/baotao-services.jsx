@@ -428,7 +428,7 @@ export default async function BaotaoService() {
                 </a>
                 <a
                   className="J_UserMemberNickUrl member-nickurl-horiz"
-                  href="#"
+                  href={user ? "/account/manage" : "#"}
                   target="_self"
                 >
                   <span className="member-nick-info member-nick-info-order">
@@ -447,12 +447,19 @@ export default async function BaotaoService() {
                   )}
 
                   <span className="divider" />
-                  <a href="" className="btn-open">
+                  <a href="/store-setup" className="btn-open">
                     Store setup
                   </a>
                 </div>
               </div>
-              {!user && (
+              {user ? (
+                <div className="member-ft member-ft-order">
+                  <div
+                    className="member-logout J_UserMemberLogout"
+                    style={{ display: "block" }}
+                  ></div>
+                </div>
+              ) : (
                 <div className="member-ft member-ft-order">
                   <div
                     className="member-logout J_UserMemberLogout"

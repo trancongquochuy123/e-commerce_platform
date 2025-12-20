@@ -2,7 +2,7 @@ extends ../../layout/default.pug
 include ../../mixins/alert.pug
 
 block main
-    if role.permissions.includes('role_view')
+    if role.permissions.includes('roles_view')
         h1 Chi tiết nhóm quyền
         +alert-success(5000)
         +alert-error(5000)
@@ -14,5 +14,5 @@ block main
             dt Mô tả ngắn:
             dd #{record.description}
 
-        a.btn.btn-secondary(href=`${prefixAdmin}/roles`) Quay lại
-        a.btn.btn-primary(href=`${prefixAdmin}/roles/edit/${record._id}`) Chỉnh sửa
+        a.btn.btn-secondary(href=`/${prefixAdmin}/roles`) Quay lại
+        a.btn.btn-primary(href=`/${prefixAdmin}/roles/edit/${record._id}`) Chỉnh sửa

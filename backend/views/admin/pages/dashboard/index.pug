@@ -6,7 +6,7 @@ block main
         .dashboard-header
             .welcome-section
                 h1.dashboard-title Dashboard Overview
-                p.welcome-text Xin chào, #{user.fullName}!
+                p.welcome-text Xin chào, #{user.fullName || 'Guest'}!
                 - const currentRole = Array.isArray(role) ? role[0] : role;
                 span.role-badge(
                 class= currentRole.title && typeof currentRole.title === 'string' ? `role-${currentRole.title.toLowerCase()}` : 'role-unknown'

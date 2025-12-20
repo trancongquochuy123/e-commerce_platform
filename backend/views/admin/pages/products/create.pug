@@ -3,13 +3,13 @@ include ../../mixins/alert.pug
 include ../../mixins/select-tree.pug
 
 block main
-    if (role.permissions.includes('product_create'))
+    if (role.permissions.includes('products_create'))
 
         h1 Create Product
         +alert-error(5000)
 
         form(
-            action=`${prefixAdmin}/products/create`
+            action=`/${prefixAdmin}/products/create`
             method="POST"
             id="form-create-product"
             enctype="multipart/form-data"

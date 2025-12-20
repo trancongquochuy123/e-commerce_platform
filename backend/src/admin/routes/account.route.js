@@ -1,0 +1,31 @@
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const { uploadCloudinary } = require('../middlewares/uploadCloud.middleware.js');
+
+const upload = multer();
+
+const controller = require('../controllers/account.controller.js');
+
+
+router.get("/", controller.index);
+router.get("/create", controller.create);
+
+// Multer
+router.post('/create',
+    upload.single('avatar'),
+    uploadCloudinary('accounts/avatars'),
+    // validate.createAccount,
+    controller.createAccount
+);
+
+router.get("/edit/:id", controller.edit);
+
+router.patch('/edit/:id',
+    upload.single('avatar'),
+    uploadCloudinary('accounts/avatars'),
+    // validate.editAccount,
+    controller.editAccount
+);
+
+module.exports = router;

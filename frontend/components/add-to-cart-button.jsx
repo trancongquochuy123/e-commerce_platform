@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_URL } from "@/lib/constants";
+import { ShoppingCart, ShoppingCartIcon } from "lucide-react";
 
 export default function AddToCartButton({ productId, stock }) {
   const router = useRouter();
@@ -34,6 +35,12 @@ export default function AddToCartButton({ productId, stock }) {
   };
 
   const handleAddToCart = async () => {
+    const isLoggedIn = document.cookie.split("; ").some((row) => row.startsWith("tokenUser="));
+    if (!isLoggedIn) {
+      router.push("/login");
+      return;
+    }
+
     if (quantity < 1 || quantity > stock) {
       setError(`Please select a valid quantity (1-${stock})`);
       return;
@@ -165,7 +172,10 @@ export default function AddToCartButton({ productId, stock }) {
               Adding...
             </span>
           ) : stock > 0 ? (
-            "Add to Cart"
+            <div className="flex gap-3">
+              <ShoppingCart />
+              Add to Cart
+            </div>
           ) : (
             "Out of Stock"
           )}

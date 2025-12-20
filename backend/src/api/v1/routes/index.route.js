@@ -1,39 +1,34 @@
-// src/api/v1/routes/index.route.js
-const express = require('express');
+// src/api/v1/routes/client/index.js
+console.log("📌 Client routes loaded!");
+
+const express = require("express");
 const router = express.Router();
 
-// Config
-const systemConfig = require('../../../../config/system.js');
-
 // Middlewares
-const adminAuth = require('../middlewares/admin/auth.middleware.js');
-const permission = require('../middlewares/admin/permission.middleware.js');
+const settingsMiddleware = require("../../../admin/middlewares/setting.middleware");
+const categoryMiddleware = require("../middlewares/category.middleware");
+const cartMiddleware = require("../middlewares/cart.middleware");
+const userMiddleware = require("../middlewares/user.middleware");
 
-// Sub routers
-const adminRoutes = require('./admin/index.route.js');
-const clientRoutes = require('./client/index.route.js');
+// Validation + Rate limit
+const validateRequest = require("../middlewares/validateRequest.middleware");
+const cartRateLimit = require("../middlewares/cartRateLimit.middleware");
 
-console.log('📦 Loading API v1 routes...');
+// Apply middlewares cho toàn bộ client routes
+router.use(validateRequest.validateRequest);
+// router.use(cartRateLimit.cartCreationLimit);
 
-/** -------------------------------------------------------
- *  CLIENT ROUTES (Public)
- *  Mount at: /api/v1/*
- * -------------------------------------------------------- */
-router.use('/', clientRoutes);
+router.use(settingsMiddleware.SettingGeneral);
+router.use(categoryMiddleware.category);
+// router.use(cartMiddleware.cartId);
+router.use(userMiddleware.infoUser);
 
-/** -------------------------------------------------------
- *  ADMIN ROUTES (Private)
- *  Mount at: /api/v1/admin/*
- * -------------------------------------------------------- */
-const PATH_ADMIN = systemConfig.prefixAdmin || '/admin';
-
-router.use(
-    PATH_ADMIN,
-    adminAuth.requireAuth,     // Bắt buộc login
-    permission.checkRole,      // Kiểm tra quyền
-    adminRoutes                // Nhóm admin routes
-);
-
-console.log('✅ API v1 routes loaded successfully!');
+// Sub routes
+router.use("/", require("./home.route"));
+router.use("/products", require("./product.route"));
+router.use("/search", require("./search.route"));
+router.use("/cart", cartMiddleware.cartId, require("./cart.route"));
+router.use("/checkout", require("./checkout.route")); // Auth trong file route riêng
+router.use("/user", require("./user.route"));
 
 module.exports = router;

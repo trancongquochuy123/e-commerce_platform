@@ -1,5 +1,274 @@
-tree /f
+C:\Users\admin\OneDrive\Máy tính\e-commerce_platform\backend>tree /f
+Folder PATH listing for volume Acer
+Volume serial number is 72A6-4E49
+C:.
+│   .env
+│   .gitignore
+│   package-lock.json
+│   package.json
+│   server.js
+│   structure.txt
+│   
+├───config
+│       cloudinary.js
+│       cors.js
+│       database.js
+│       swagger.js
+│       system.js
+│       
+├───docs
+│       api-v1.md
+│       api-v2.md
+│       
+├───logs
+│       combined.log
+│       error.log
+│       
+├───public
+│   ├───admin
+│   │   ├───css
+│   │   │       style.css
+│   │   │       
+│   │   └───js
+│   │           product.js
+│   │           role.js
+│   │           script.js
+│   │           tinymce-config.js
+│   │
+│   ├───css
+│   │       style.css
+│   │
+│   ├───images
+│   │       favicon.ico
+│   │       logo.jpg
+│   │
+│   ├───js
+│   │       cart.js
+│   │       main.js
+│   │       product.js
+│   │       readme.md
+│   │       script.js
+│   │       utils.js
+│   │
+│   └───uploads
+├───seed
+│       seed.js
+│
+├───src
+│   ├───admin
+│   │   ├───controllers
+│   │   │       account.controller.js
+│   │   │       auth.controller.js
+│   │   │       dashboard.controller.js
+│   │   │       my-account.controller.js
+│   │   │       product-category.controller.js
+│   │   │       product.controller.js
+│   │   │       role.controller.js
+│   │   │       setting.controller.js
+│   │   │
+│   │   ├───middlewares
+│   │   │       auth.middleware.js
+│   │   │       permission.middleware.js
+│   │   │       setting.middleware.js
+│   │   │       uploadCloud.middleware.js
+│   │   │
+│   │   ├───routes
+│   │   │       account.route.js
+│   │   │       auth.route.js
+│   │   │       dashboard.route.js
+│   │   │       index.route.js
+│   │   │       my-account.route.js
+│   │   │       product-category.route.js
+│   │   │       product.route.js
+│   │   │       role.route.js
+│   │   │       setting.route.js
+│   │   │
+│   │   └───validators
+│   │           auth.validator.js
+│   │           product-category.validator.js
+│   │           product.validator.js
+│   │
+│   ├───api
+│   │   ├───v1
+│   │   │   ├───controllers
+│   │   │   │       cart.controller.js
+│   │   │   │       checkout.controller.js
+│   │   │   │       home.controller.js
+│   │   │   │       product.controller.js
+│   │   │   │       search.controller.js
+│   │   │   │       user.controller.js
+│   │   │   │
+│   │   │   ├───middlewares
+│   │   │   │       cart.middleware.js
+│   │   │   │       cartRateLimit.middleware.js
+│   │   │   │       category.middleware.js
+│   │   │   │       errorHandler.middleware.js
+│   │   │   │       notFound.middleware.js
+│   │   │   │       user.middleware.js
+│   │   │   │       validateRequest.middleware.js
+│   │   │   │
+│   │   │   ├───routes
+│   │   │   │       cart.route.js
+│   │   │   │       checkout.route.js
+│   │   │   │       home.route.js
+│   │   │   │       index.route.js
+│   │   │   │       product.route.js
+│   │   │   │       search.route.js
+│   │   │   │       user.route.js
+│   │   │   │
+│   │   │   ├───services
+│   │   │   │   ├───admin
+│   │   │   │   └───client
+│   │   │   └───validators
+│   │   │           user.validator.js
+│   │   │
+│   │   └───v2
+│   ├───models
+│   │       account.model.js
+│   │       cart.model.js
+│   │       forgot-password.model.js
+│   │       order.model.js
+│   │       permission.model.js
+│   │       product-category.model.js
+│   │       product.model.js
+│   │       role.model.js
+│   │       settings-general.model.js
+│   │       user.model.js
+│   │
+│   ├───shared
+│   │       cache.js
+│   │       logger.js
+│   │       queue.js
+│   │
+│   └───utils
+│           apiError.js
+│           constants.js
+│           createTree.js
+│           filterStatus.js
+│           generate.js
+│           handleDescriptionImage.js
+│           pagination.js
+│           product-category.js
+│           products.js
+│           response.js
+│           search.js
+│           sendMail.js
+│           storageMulter.js
+│
+├───tests
+│   ├───migration
+│   └───unit
+├───uploads
+└───views
+    ├───admin
+    │   ├───layout
+    │   │       auth.pug
+    │   │       default.pug
+    │   │
+    │   ├───mixins
+    │   │       alert.pug
+    │   │       filter-status.pug
+    │   │       form-change-multi.pug
+    │   │       format-datetime.pug
+    │   │       pagination.pug
+    │   │       search.pug
+    │   │       select-tree.pug
+    │   │       sort.pug
+    │   │       table-tree.pug
+    │   │
+    │   ├───pages
+    │   │   ├───accounts
+    │   │   │       create.pug
+    │   │   │       edit.pug
+    │   │   │       index.pug
+    │   │   │
+    │   │   ├───auth
+    │   │   │       login.pug
+    │   │   │
+    │   │   ├───dashboard
+    │   │   │       index.pug
+    │   │   │
+    │   │   ├───my-account
+    │   │   │       edit.pug
+    │   │   │       index.pug
+    │   │   │
+    │   │   ├───products
+    │   │   │       create.pug
+    │   │   │       detail.pug
+    │   │   │       edit.pug
+    │   │   │       index.pug
+    │   │   │
+    │   │   ├───products-category
+    │   │   │       create.pug
+    │   │   │       detail.pug
+    │   │   │       edit.pug
+    │   │   │       index.pug
+    │   │   │
+    │   │   ├───roles
+    │   │   │       create.pug
+    │   │   │       detail.pug
+    │   │   │       edit.pug
+    │   │   │       index.pug
+    │   │   │       permission.pug
+    │   │   │
+    │   │   └───settings
+    │   │           general.pug
+    │   │
+    │   └───partials
+    │           footer.pug
+    │           header.pug
+    │           sider.pug
+    │
+    └───client
+        ├───layouts
+        │       default.pug
+        │
+        ├───mixins
+        │       alert.pug
+        │       box-head.pug
+        │       mini-cart.pug
+        │       product-item.pug
+        │       product-layout.pug
+        │       sub-menu.pug
+        │
+        ├───pages
+        │   ├───cart
+        │   │       index.pug
+        │   │
+        │   ├───checkout
+        │   │       index.pug
+        │   │       success.pug
+        │   │
+        │   ├───errors
+        │   │       404.pug
+        │   │
+        │   ├───home
+        │   │       index.pug
+        │   │
+        │   ├───products
+        │   │       category.pug
+        │   │       detail.pug
+        │   │       index.pug
+        │   │
+        │   ├───search
+        │   │       index.pug
+        │   │
+        │   └───user
+        │           forgot-password.pug
+        │           info.pug
+        │           login.pug
+        │           otp-password.pug
+        │           register.pug
+        │           reset-password.pug
+        │
+        └───partials
+                footer.pug
+                header.pug
 
+
+C:\Users\admin\OneDrive\Máy tính\e-commerce_platform\backend>tree /f
+Folder PATH listing for volume Acer
+Volume serial number is 72A6-4E49
 C:.
 │   .env
 │   .gitignore
@@ -50,79 +319,76 @@ C:.
 │   │       utils.js
 │   │
 │   └───uploads
+├───seed
+│       seed.js
+│
 ├───src
+│   ├───admin
+│   │   ├───controllers
+│   │   │       account.controller.js
+│   │   │       auth.controller.js
+│   │   │       dashboard.controller.js
+│   │   │       my-account.controller.js
+│   │   │       product-category.controller.js
+│   │   │       product.controller.js
+│   │   │       role.controller.js
+│   │   │       setting.controller.js
+│   │   │
+│   │   ├───middlewares
+│   │   │       auth.middleware.js
+│   │   │       permission.middleware.js
+│   │   │       setting.middleware.js
+│   │   │       uploadCloud.middleware.js
+│   │   │
+│   │   ├───routes
+│   │   │       account.route.js
+│   │   │       auth.route.js
+│   │   │       dashboard.route.js
+│   │   │       index.route.js
+│   │   │       my-account.route.js
+│   │   │       product-category.route.js
+│   │   │       product.route.js
+│   │   │       role.route.js
+│   │   │       setting.route.js
+│   │   │
+│   │   └───validators
+│   │           auth.validator.js
+│   │           product-category.validator.js
+│   │           product.validator.js
+│   │
 │   ├───api
 │   │   ├───v1
 │   │   │   ├───controllers
-│   │   │   │   ├───admin
-│   │   │   │   │       account.controller.js
-│   │   │   │   │       auth.controller.js
-│   │   │   │   │       dashboard.controller.js
-│   │   │   │   │       my-account.controller.js
-│   │   │   │   │       product-category.controller.js
-│   │   │   │   │       product.controller.js
-│   │   │   │   │       role.controller.js
-│   │   │   │   │       setting.controller.js
-│   │   │   │   │
-│   │   │   │   └───client
-│   │   │   │           cart.controller.js
-│   │   │   │           checkout.controller.js
-│   │   │   │           home.controller.js
-│   │   │   │           product.controller.js
-│   │   │   │           search.controller.js
-│   │   │   │           user.controller.js
+│   │   │   │       cart.controller.js
+│   │   │   │       checkout.controller.js
+│   │   │   │       home.controller.js
+│   │   │   │       product.controller.js
+│   │   │   │       search.controller.js
+│   │   │   │       user.controller.js
 │   │   │   │
 │   │   │   ├───middlewares
-│   │   │   │   │   errorHandler.middleware.js
-│   │   │   │   │   notFound.middleware.js
-│   │   │   │   │
-│   │   │   │   ├───admin
-│   │   │   │   │       auth.middleware.js
-│   │   │   │   │       permission.middleware.js
-│   │   │   │   │       setting.middleware.js
-│   │   │   │   │       uploadCloud.middleware.js
-│   │   │   │   │
-│   │   │   │   └───client
-│   │   │   │           cart.middleware.js
-│   │   │   │           cartRateLimit.middleware.js
-│   │   │   │           category.middleware.js
-│   │   │   │           user.middleware.js
-│   │   │   │           validateRequest.middleware.js
+│   │   │   │       cart.middleware.js
+│   │   │   │       cartRateLimit.middleware.js
+│   │   │   │       category.middleware.js
+│   │   │   │       errorHandler.middleware.js
+│   │   │   │       notFound.middleware.js
+│   │   │   │       user.middleware.js
+│   │   │   │       validateRequest.middleware.js
 │   │   │   │
 │   │   │   ├───routes
-│   │   │   │   │   index.route.js
-│   │   │   │   │
-│   │   │   │   ├───admin
-│   │   │   │   │       account.route.js
-│   │   │   │   │       auth.route.js
-│   │   │   │   │       dashboard.route.js
-│   │   │   │   │       index.route.js
-│   │   │   │   │       my-account.route.js
-│   │   │   │   │       product-category.route.js
-│   │   │   │   │       product.route.js
-│   │   │   │   │       role.route.js
-│   │   │   │   │       setting.route.js
-│   │   │   │   │
-│   │   │   │   └───client
-│   │   │   │           cart.route.js
-│   │   │   │           checkout.route.js
-│   │   │   │           home.route.js
-│   │   │   │           index.route.js
-│   │   │   │           product.route.js
-│   │   │   │           search.route.js
-│   │   │   │           user.route.js
+│   │   │   │       cart.route.js
+│   │   │   │       checkout.route.js
+│   │   │   │       home.route.js
+│   │   │   │       index.route.js
+│   │   │   │       product.route.js
+│   │   │   │       search.route.js
+│   │   │   │       user.route.js
 │   │   │   │
 │   │   │   ├───services
 │   │   │   │   ├───admin
 │   │   │   │   └───client
 │   │   │   └───validators
-│   │   │       ├───admin
-│   │   │       │       auth.validator.js
-│   │   │       │       product-category.validator.js
-│   │   │       │       product.validator.js
-│   │   │       │
-│   │   │       └───client
-│   │   │               user.validator.js
+│   │   │           user.validator.js
 │   │   │
 │   │   └───v2
 │   ├───models
@@ -160,6 +426,7 @@ C:.
 ├───tests
 │   ├───migration
 │   └───unit
+├───uploads
 └───views
     ├───admin
     │   ├───layout

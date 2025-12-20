@@ -6,9 +6,9 @@ block main
     h1 Product List
     .row 
         .col-6.text-end
-            if role.permissions.includes('product_category_create')
+            if role.permissions.includes('categories_create')
                 a(
-                    href=`${prefixAdmin}/products-category/create`
+                    href=`/${prefixAdmin}/products-category/create`
                     class="btn btn-primary"
                 ) Create Products
 
@@ -18,7 +18,7 @@ block main
     )
         thead
             tr
-                if role.permissions.includes('product_category_delete') || role.permissions.includes('product_category_edit')
+                if role.permissions.includes('categories_delete') || role.permissions.includes('categories_edit')
                     th 
                         input(
                             type="checkbox"
@@ -39,14 +39,14 @@ block main
         id="form-change-status"
         action=""
         method="POST"
-        data-path=`${prefixAdmin}/products-category/change-status`
+        data-path=`/${prefixAdmin}/products-category/change-status`
     )
 
     form(
         id="form-delete-item"
         action=""
         method="POST"
-        data-path=`${prefixAdmin}/products-category/delete`
+        data-path=`/${prefixAdmin}/products-category/delete`
     )
 
     script(src="/admin/js/product.js")

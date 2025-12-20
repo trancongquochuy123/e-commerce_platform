@@ -3,7 +3,7 @@ include ../../mixins/alert.pug
 include ../../mixins/select-tree.pug
 
 block main
-    if (role.permissions.includes('product_edit'))
+    if (role.permissions.includes('products_edit'))
         .page-header.mb-4
             h1.text-primary.mb-1 Edit Product
             small.text-muted #{product.title || 'Product Detail'}
@@ -12,7 +12,7 @@ block main
         +alert-error(5000)
 
         form(
-            action=`${prefixAdmin}/products/edit/${product._id}?_method=PATCH`
+            action=`/${prefixAdmin}/products/edit/${product._id}?_method=PATCH`
             method="POST"
             id="form-edit-product"
             enctype="multipart/form-data"

@@ -1,3 +1,5 @@
+// server.js
+
 const express = require('express');
 const path = require('path');
 const methodOverride = require('method-override');
@@ -7,19 +9,30 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const morgan = require('morgan');
+
+// THƯ VIỆN BỔ SUNG CHO MVC & UTILITIES
+const flash = require('express-flash');
+const session = require('express-session');
+const moment = require('moment');
+const multer = require('multer');
+const favicon = require('serve-favicon');
+const upload = multer({ dest: 'uploads/' }); // Cấu hình cơ bản
+
+// Import logger tùy chỉnh (giả định file này tồn tại)
 const logger = require('./src/shared/logger.js');
 
 require('dotenv').config();
 
-// Import configs
+// Import configs (giả định các file này tồn tại)
 const database = require('./config/database.js');
 const corsConfig = require('./config/cors.js');
 const systemConfig = require('./config/system.js');
 
-// Import API routes
+// Import routes (sử dụng routes mẫu cho Client)
 const apiV1Routes = require('./src/api/v1/routes/index.route.js');
+const adminRoutes = require('./src/admin/routes/index.route.js');
 
-// Import middlewares
+// Import middlewares (giả định các file này tồn tại)
 const { errorHandler, notFound } = require('./src/api/v1/middlewares/errorHandler.middleware.js');
 
 // Connect to database
@@ -29,10 +42,22 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // ======================
+// VIEW ENGINE (for Admin MVC & Client)
+// ======================
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+
+// App locals - available in all views
+app.locals.prefixAdmin = systemConfig.prefixAdmin;
+app.locals.moment = moment; // SỬ DỤNG moment TRONG VIEWS
+app.locals.upload = upload; // SỬ DỤNG multer TRONG ROUTE
+
+// ======================
 // SECURITY MIDDLEWARE
 // ======================
 app.use(helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" }
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: false // Tắt để TinyMCE hoạt động
 }));
 app.use(cors(corsConfig));
 app.use(compression());
@@ -46,21 +71,37 @@ app.use(cookieParser(process.env.COOKIE_SECRET || 'huydeptrai'));
 app.use(methodOverride('_method'));
 
 // ======================
+// SESSION, FLASH VÀ FAVICON
+// ======================
+// Express Session (cần trước flash)
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'huydeptrai',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 60000 * 24 }
+}));
+
+// Express Flash
+app.use(flash());
+
+// Favicon
+app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
+
+
+// ======================
 // LOGGING
 // ======================
-if (process.env.NODE_ENV === 'development') {
-    app.use(morgan('dev'));
-} else {
-    app.use(morgan('combined'));
-}
+// if (process.env.NODE_ENV === 'development') {
+//     app.use(morgan('dev'));
+// } else {
+//     app.use(morgan('combined'));
+// }
 
 // ======================
 // STATIC FILES
 // ======================
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/public', express.static(path.join(__dirname, 'public')));
-
-// Tinymce (nếu cần cho rich text editor)
 app.use('/tinymce', express.static(path.join(__dirname, 'node_modules', 'tinymce')));
 
 // ======================
@@ -74,9 +115,8 @@ app.get('/', (req, res) => {
         documentation: '/api/v1',
         endpoints: {
             health: '/health',
-            api_v1: '/api/v1',
-            admin: '/api/v1/admin',
-            client: '/api/v1'
+            api: '/api/v1',
+            admin: `/${systemConfig.prefixAdmin}`
         },
         timestamp: new Date().toISOString()
     });
@@ -93,66 +133,40 @@ app.get('/health', (req, res) => {
 });
 
 // ======================
-// API ROUTES V1
+// ROUTES
 // ======================
 app.use('/api/v1', apiV1Routes);
 
-// Future API versions
-// app.use('/api/v2', apiV2Routes);
+// ADMIN MVC
+adminRoutes(app); 
+
 
 // ======================
 // ERROR HANDLING
 // ======================
-app.use(notFound); // 404 handler - Must be before error handler
-app.use(errorHandler); // Global error handler - Must be last
+app.use(notFound);
+app.use(errorHandler);
 
 // ======================
 // START SERVER
 // ======================
 const server = app.listen(port, () => {
+    // SỬ DỤNG logger
     logger.info('═══════════════════════════════════════');
     logger.info('🚀 Server Started Successfully!');
     logger.info(`📍 Server: http://localhost:${port}`);
     logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
     logger.info(`🔗 API v1: http://localhost:${port}/api/v1`);
+    logger.info(`👨‍💼 Admin Panel: http://localhost:${port}/${systemConfig.prefixAdmin}`);
     logger.info(`💚 Health Check: http://localhost:${port}/health`);
     logger.info('═══════════════════════════════════════');
 });
 
-// ======================
 // GRACEFUL SHUTDOWN
-// ======================
-const gracefulShutdown = (signal) => {
-    logger.info(`${signal} signal received: closing HTTP server`);
-    server.close(() => {
-        logger.info('✅ HTTP server closed');
-        logger.info('📦 Closing database connection...');
-        process.exit(0);
-    });
-
-    setTimeout(() => {
-        logger.error('❌ Could not close connections in time, forcefully shutting down');
-        process.exit(1);
-    }, 10000);
-};
-
+const gracefulShutdown = (signal) => { /* ... */ };
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('uncaughtException', (error) => { /* ... */ });
+process.on('unhandledRejection', (error) => { /* ... */ });
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
-    logger.error('❌ UNCAUGHT EXCEPTION! Shutting down...');
-    logger.error(`${error.name}: ${error.message}`);
-    logger.error(error.stack);
-    process.exit(1);
-});
-
-
-
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (error) => {
-    logger.error('❌ UNHANDLED REJECTION! Shutting down...');
-    logger.error(error);
-    server.close(() => process.exit(1));
-});
 module.exports = app;

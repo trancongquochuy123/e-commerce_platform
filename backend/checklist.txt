@@ -1,0 +1,7 @@
+/admin/accounts
+[] Khi sửa đổi tài khoản thì phải chọn luôn role hiện có và giữ lại avatar nếu không upload avatar mới
+[] Sửa filter
+[] Sửa tìm kiếm
+[] Thêm chức năng xoá tài khoản
+
+
