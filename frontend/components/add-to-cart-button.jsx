@@ -35,6 +35,12 @@ export default function AddToCartButton({ productId, stock }) {
   };
 
   const handleAddToCart = async () => {
+    const isLoggedIn = document.cookie.split("; ").some((row) => row.startsWith("tokenUser="));
+    if (!isLoggedIn) {
+      router.push("/login");
+      return;
+    }
+
     if (quantity < 1 || quantity > stock) {
       setError(`Please select a valid quantity (1-${stock})`);
       return;

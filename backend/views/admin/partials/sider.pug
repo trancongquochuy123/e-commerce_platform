@@ -1,27 +1,30 @@
 .sider
     nav.menu
         ul
-            li
-                a(href=`/${prefixAdmin}/dashboard`) Trang chủ
+            if role.permissions.includes('dashboard_view') 
+                li
+                    a(href=`/${prefixAdmin}/dashboard`) Trang chủ
 
             if role.permissions.includes('products_view') 
                 li
-                    a(href=`/${prefixAdmin}/products`) Sản phẩm
+                    a(href=`/${prefixAdmin}/products`) Danh mục sản phẩm
 
             if role.permissions.includes('categories_view') 
                 li
-                    a(href=`/${prefixAdmin}/products-category`) Danh mục sản phẩm
+                    a(href=`/${prefixAdmin}/products-category`) Phân loại sản phẩm
 
             if role.permissions.includes('roles_view')
                 li
                     a(href=`/${prefixAdmin}/roles`) Danh mục vai trò
 
-            if role.permissions.includes('roles_permission') 
+            if role.permissions.includes('roles_permissions') 
                 li    
                     a(href=`/${prefixAdmin}/roles/permissions`) Phân quyền
 
             if role.permissions.includes('accounts_view') 
                 li
                     a(href=`/${prefixAdmin}/accounts`) Danh sách tài khoản
-            li
-                a(href=`/${prefixAdmin}/settings/general`) Cài đặt chung
+
+            if role.permissions.includes('settings_view') 
+                li
+                    a(href=`/${prefixAdmin}/settings/general`) Cài đặt chung

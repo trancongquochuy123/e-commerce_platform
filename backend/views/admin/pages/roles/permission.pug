@@ -1,7 +1,7 @@
 extends ../../layout/default.pug
 
 block main
-    if role.permissions.includes('roles_permission')
+    if role.permissions.includes('roles_permissions')
         .container.mt-4
             h1.text-center.mb-4.text-warning.fs-3 Quản lý phân quyền
 
@@ -84,7 +84,7 @@ block main
                                                         = perm.label
                                                 each role in roles
                                                     - const normalizedKey = perm.key.replace(/\./g, '_')
-                                                    - const checked = role.permissions.includes(normalizedKey)
+                                                    - const checked = role.permissions.includes(perm.key) || role.permissions.includes(normalizedKey)
                                                     td.px-3.py-2.text-center
                                                         .form-check.d-flex.justify-content-center.mb-0
                                                             input.form-check-input.permission-checkbox(

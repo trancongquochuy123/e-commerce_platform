@@ -6,7 +6,7 @@ block main
     h1 Product List
     .row 
         .col-6.text-end
-            if role.permissions.includes('product_category_create')
+            if role.permissions.includes('categories_create')
                 a(
                     href=`/${prefixAdmin}/products-category/create`
                     class="btn btn-primary"
@@ -18,7 +18,7 @@ block main
     )
         thead
             tr
-                if role.permissions.includes('product_category_delete') || role.permissions.includes('product_category_edit')
+                if role.permissions.includes('categories_delete') || role.permissions.includes('categories_edit')
                     th 
                         input(
                             type="checkbox"

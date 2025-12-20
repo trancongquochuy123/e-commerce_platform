@@ -1,9 +1,9 @@
 const ProductCategory = require("../../../models/product-category.model.js");
 const Product = require("../../../models/product.model.js");
-const ResponseFormatter = require('../../../utils/response.js');
-const ApiError = require('../../../utils/apiError.js');
-const { priceNewProduct, getPriceNew } = require('../../../utils/products.js');
-const { getSubCategories } = require('../../../utils/product-category.js');
+const ResponseFormatter = require("../../../utils/response.js");
+const ApiError = require("../../../utils/apiError.js");
+const { priceNewProduct, getPriceNew } = require("../../../utils/products.js");
+const { getSubCategories } = require("../../../utils/product-category.js");
 
 /**
  * @desc    Get all active products
@@ -16,28 +16,28 @@ const getAllProducts = async (req, res, next) => {
         const {
             page = 1,
             limit = 20,
-            sort = 'position',
-            order = 'desc',
+            sort = "position",
+            order = "desc",
             category,
             minPrice,
             maxPrice,
             brand,
             rating,
-            search
+            search,
         } = req.query;
 
         // Build filter conditions
         const filters = {
             deleted: false,
-            status: 'active'
+            status: "active",
         };
 
         // Category filter
         if (category) {
-            const categoryDoc = await ProductCategory.findOne({ 
+            const categoryDoc = await ProductCategory.findOne({
                 slug: category,
                 deleted: false,
-                status: 'active'
+                status: "active",
             });
             if (categoryDoc) {
                 filters.product_category_id = categoryDoc._id;
@@ -64,51 +64,52 @@ const getAllProducts = async (req, res, next) => {
         // Search filter
         if (search) {
             filters.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } },
-                { tags: { $in: [new RegExp(search, 'i')] } }
+                { title: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } },
+                { tags: { $in: [new RegExp(search, "i")] } },
             ];
         }
 
         // Pagination
         const skip = (parseInt(page) - 1) * parseInt(limit);
-        const sortOrder = order === 'asc' ? 1 : -1;
+        const sortOrder = order === "asc" ? 1 : -1;
 
         // Execute queries in parallel
         const [products, totalProducts] = await Promise.all([
             Product.find(filters)
-                .populate('product_category_id', 'title slug')
-                .select('-deleted -deletedBy -updatedBy -__v')
+                .populate("product_category_id", "title slug")
+                .select("-deleted -deletedBy -updatedBy -__v")
                 .sort({ [sort]: sortOrder })
                 .skip(skip)
                 .limit(parseInt(limit))
                 .lean()
                 .exec(),
-            
-            Product.countDocuments(filters)
+
+            Product.countDocuments(filters),
         ]);
 
         // Calculate discounted prices
-        const productsWithPrices = priceNewProduct(products);
+        products.forEach((product) => {
+            product.priceNew = priceNewProduct(product);
+        });
 
         // Pagination metadata
         const pagination = {
             currentPage: parseInt(page),
             totalPages: Math.ceil(totalProducts / parseInt(limit)),
             totalItems: totalProducts,
-            limit: parseInt(limit)
+            limit: parseInt(limit),
         };
 
         return ResponseFormatter.paginated(
             res,
-            productsWithPrices,
+            products,
             pagination,
-            'Products retrieved successfully'
+            "Products retrieved successfully"
         );
-
     } catch (error) {
-        console.error('❌ Get products error:', error);
-        next(new ApiError(500, 'Failed to fetch products'));
+        console.error("❌ Get products error:", error);
+        next(new ApiError(500, "Failed to fetch products"));
     }
 };
 
@@ -124,23 +125,27 @@ const getProductBySlug = async (req, res, next) => {
         const product = await Product.findOne({
             slug,
             deleted: false,
-            status: 'active'
+            status: "active",
         })
-            .populate('product_category_id', 'title slug')
-            .select('-deleted -deletedBy -updatedBy -__v')
+            .populate("product_category_id", "title slug")
+            .select("-deleted -deletedBy -updatedBy -__v")
             .lean()
             .exec();
 
         if (!product) {
-            throw new ApiError(404, 'Product not found');
+            throw new ApiError(404, "Product not found");
         }
 
         // Calculate discounted price
-        product.priceNew = parseFloat(getPriceNew(product.price, product.discountPercentage));
+        product.priceNew = parseFloat(
+            getPriceNew(product.price, product.discountPercentage)
+        );
 
         // Calculate average rating from reviews
         if (product.reviews && product.reviews.length > 0) {
-            const avgRating = product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length;
+            const avgRating =
+                product.reviews.reduce((sum, r) => sum + r.rating, 0) /
+                product.reviews.length;
             product.averageRating = parseFloat(avgRating.toFixed(1));
             product.totalReviews = product.reviews.length;
         } else {
@@ -154,27 +159,30 @@ const getProductBySlug = async (req, res, next) => {
                 product_category_id: product.product_category_id._id,
                 _id: { $ne: product._id },
                 deleted: false,
-                status: 'active'
+                status: "active",
             })
-                .select('title slug thumbnail price discountPercentage rating')
+                .select("title slug thumbnail price discountPercentage rating")
                 .limit(4)
                 .lean();
 
-            product.relatedProducts = priceNewProduct(relatedProducts);
+            product.relatedProducts = [];
+            relatedProducts.forEach((item) => {
+                item.priceNew = priceNewProduct(item);
+                product.relatedProducts.push(item);
+            });
         }
 
         return ResponseFormatter.success(
             res,
             product,
-            'Product retrieved successfully'
+            "Product retrieved successfully"
         );
-
     } catch (error) {
-        console.error('❌ Get product detail error:', error);
+        console.error("❌ Get product detail error:", error);
         if (error instanceof ApiError) {
             return next(error);
         }
-        next(new ApiError(500, 'Failed to fetch product details'));
+        next(new ApiError(500, "Failed to fetch product details"));
     }
 };
 
@@ -190,51 +198,51 @@ const getProductsByCategory = async (req, res, next) => {
         const {
             page = 1,
             limit = 20,
-            sort = 'createdAt',
-            order = 'desc'
+            sort = "createdAt",
+            order = "desc",
         } = req.query;
 
         // Find parent category
         const parentCategory = await ProductCategory.findOne({
             slug: slugCategory,
             deleted: false,
-            status: 'active'
+            status: "active",
         }).lean();
 
         if (!parentCategory) {
-            throw new ApiError(404, 'Category not found');
+            throw new ApiError(404, "Category not found");
         }
 
         // Get all subcategories
         const allSubCategories = await getSubCategories(parentCategory._id);
         const categoryIds = [
             parentCategory._id,
-            ...allSubCategories.map(c => c._id)
+            ...allSubCategories.map((c) => c._id),
         ];
 
         // Build filters
         const filters = {
             product_category_id: { $in: categoryIds },
             deleted: false,
-            status: 'active'
+            status: "active",
         };
 
         // Pagination
         const skip = (parseInt(page) - 1) * parseInt(limit);
-        const sortOrder = order === 'asc' ? 1 : -1;
+        const sortOrder = order === "asc" ? 1 : -1;
 
         // Execute queries in parallel
         const [products, totalProducts] = await Promise.all([
             Product.find(filters)
-                .populate('product_category_id', 'title slug')
-                .select('-deleted -deletedBy -updatedBy -__v')
+                .populate("product_category_id", "title slug")
+                .select("-deleted -deletedBy -updatedBy -__v")
                 .sort({ [sort]: sortOrder })
                 .skip(skip)
                 .limit(parseInt(limit))
                 .lean()
                 .exec(),
-            
-            Product.countDocuments(filters)
+
+            Product.countDocuments(filters),
         ]);
 
         // Calculate discounted prices
@@ -245,7 +253,7 @@ const getProductsByCategory = async (req, res, next) => {
             currentPage: parseInt(page),
             totalPages: Math.ceil(totalProducts / parseInt(limit)),
             totalItems: totalProducts,
-            limit: parseInt(limit)
+            limit: parseInt(limit),
         };
 
         return ResponseFormatter.paginated(
@@ -255,25 +263,24 @@ const getProductsByCategory = async (req, res, next) => {
                     _id: parentCategory._id,
                     title: parentCategory.title,
                     slug: parentCategory.slug,
-                    description: parentCategory.description
+                    description: parentCategory.description,
                 },
-                subcategories: allSubCategories.map(cat => ({
+                subcategories: allSubCategories.map((cat) => ({
                     _id: cat._id,
                     title: cat.title,
-                    slug: cat.slug
+                    slug: cat.slug,
                 })),
-                products: productsWithPrices
+                products: productsWithPrices,
             },
             pagination,
-            'Category products retrieved successfully'
+            "Category products retrieved successfully"
         );
-
     } catch (error) {
-        console.error('❌ Get category products error:', error);
+        console.error("❌ Get category products error:", error);
         if (error instanceof ApiError) {
             return next(error);
         }
-        next(new ApiError(500, 'Failed to fetch category products'));
+        next(new ApiError(500, "Failed to fetch category products"));
     }
 };
 
@@ -287,12 +294,12 @@ const getFeaturedProducts = async (req, res, next) => {
         const { limit = 8 } = req.query;
 
         const products = await Product.find({
-            feature: '1',
+            feature: "1",
             deleted: false,
-            status: 'active'
+            status: "active",
         })
-            .populate('product_category_id', 'title slug')
-            .select('-deleted -deletedBy -updatedBy -__v')
+            .populate("product_category_id", "title slug")
+            .select("-deleted -deletedBy -updatedBy -__v")
             .sort({ position: 1 })
             .limit(parseInt(limit))
             .lean()
@@ -304,17 +311,15 @@ const getFeaturedProducts = async (req, res, next) => {
             res,
             {
                 products: productsWithPrices,
-                count: productsWithPrices.length
+                count: productsWithPrices.length,
             },
-            'Featured products retrieved successfully'
+            "Featured products retrieved successfully"
         );
-
     } catch (error) {
-        console.error('❌ Get featured products error:', error);
-        next(new ApiError(500, 'Failed to fetch featured products'));
+        console.error("❌ Get featured products error:", error);
+        next(new ApiError(500, "Failed to fetch featured products"));
     }
 };
-
 
 /**
  * @desc    Get all categories
@@ -325,9 +330,9 @@ const getAllCategories = async (req, res, next) => {
     try {
         const categories = await ProductCategory.find({
             deleted: false,
-            status: 'active'
+            status: "active",
         })
-            .select('-deleted -deletedBy -updatedBy -__v')
+            .select("-deleted -deletedBy -updatedBy -__v")
             .sort({ position: 1 })
             .lean();
 
@@ -345,18 +350,16 @@ const getAllCategories = async (req, res, next) => {
             { categories },
             "Categories retrieved successfully"
         );
-
     } catch (error) {
         console.error("❌ Get categories error:", error);
         next(new ApiError(500, "Failed to fetch categories"));
     }
 };
 
-
 module.exports = {
     getAllProducts,
     getProductBySlug,
     getProductsByCategory,
     getFeaturedProducts,
-    getAllCategories
+    getAllCategories,
 };

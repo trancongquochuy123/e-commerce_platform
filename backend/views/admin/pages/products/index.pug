@@ -25,7 +25,7 @@ block main
                     `/${prefixAdmin}/products/change-multi?_method=PATCH`
                 )
             .col-6.text-end
-                if role.permissions.includes('product_create')
+                if role.permissions.includes('products_create')
                     a(
                         href=`/${prefixAdmin}/products/create`
                         class="btn btn-primary"
@@ -83,7 +83,7 @@ block main
                                 | N/A
 
                         td
-                            if role.permissions.includes('product_edit')
+                            if role.permissions.includes('products_edit')
                                 if (product.status == 'active')
                                     a(
                                         href="javascript:;"
@@ -107,7 +107,7 @@ block main
                                     span.out-of-stock Inactive
                             
                         td
-                            if role.permissions.includes('product_edit')
+                            if role.permissions.includes('products_edit')
                                 a(
                                     href=`/${prefixAdmin}/products/edit/${product._id}`
                                     class="btn btn-edit"
@@ -117,7 +117,7 @@ block main
                                 href=`/${prefixAdmin}/products/detail/${product._id}`
                                 class="btn btn-secondary"
                             ) Detail
-                            if role.permissions.includes('product_delete')
+                            if role.permissions.includes('products_delete')
                                 button(
                                     class="btn btn-delete"
                                     data-id=product._id

@@ -27,6 +27,10 @@ router.get('/logout', userMiddleware.requireAuth, controller.logout);
 router.get('/info', userMiddleware.requireAuth, controller.info);
 router.post('/info', userMiddleware.requireAuth, controller.infoPost);
 
+// Become seller route (requires authentication)
+router.post('/become-seller', userMiddleware.requireAuth, controller.becomeSeller);
+
+
 // Thêm các routes cần đăng nhập khác (ví dụ)
 // router.get('/profile', userMiddleware.requireAuth, controller.profile);
 // router.get('/orders', userMiddleware.requireAuth, controller.orders);

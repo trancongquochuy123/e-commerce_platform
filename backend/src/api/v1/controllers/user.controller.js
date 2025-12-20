@@ -514,7 +514,7 @@ module.exports.info = async (req, res, next) => {
     const user = await User.findOne({
       _id: req.user._id,
       deleted: false,
-    }).select("-password -tokenUser -deleted -__v");
+    }).select("-password -tokenUser -deleted -__v"); // isSeller and shopName are included by default
 
     if (!user) {
       return next(new ApiError(404, "Người dùng không tồn tại."));
@@ -522,7 +522,13 @@ module.exports.info = async (req, res, next) => {
 
     return ResponseFormatter.success(
       res,
-      { user },
+      {
+        user: {
+          ...user.toObject(),
+          isSeller: user.isSeller || false,
+          shopName: user.shopName || null,
+        },
+      },
       "Lấy thông tin người dùng thành công."
     );
   } catch (err) {
@@ -569,5 +575,63 @@ module.exports.infoPost = async (req, res, next) => {
   } catch (err) {
     console.error("❌ Error updating user info:", err);
     next(new ApiError(500, "Lỗi hệ thống khi cập nhật thông tin."));
+  }
+};
+
+// [POST] /become-seller
+module.exports.becomeSeller = async (req, res, next) => {
+  try {
+    // Check authentication
+
+    if (!req.user) {
+      return next(
+        new ApiError(401, "Truy cập bị từ chối. Vui lòng đăng nhập.")
+      );
+    }
+
+    const { shopName } = req.body;
+
+    // Validate shopName
+    if (!shopName || shopName.trim() === "") {
+      return next(new ApiError(400, "Tên cửa hàng là bắt buộc!"));
+    }
+
+    // Check if user is already a seller
+    if (req.user.isSeller) {
+      return ResponseFormatter.success(
+        res,
+        {
+          isSeller: true,
+          shopName: req.user.shopName,
+          sellerActivatedAt: req.user.sellerActivatedAt,
+        },
+        "Bạn đã là người bán hàng rồi!"
+      );
+    }
+
+    // Update user to become seller
+    const updateData = {
+      isSeller: true,
+      shopName: shopName.trim(),
+      sellerActivatedAt: new Date(),
+    };
+
+    await User.updateOne(
+      { _id: req.user._id, deleted: false },
+      { $set: updateData }
+    );
+
+    return ResponseFormatter.success(
+      res,
+      {
+        isSeller: true,
+        shopName: updateData.shopName,
+        sellerActivatedAt: updateData.sellerActivatedAt,
+      },
+      "Chúc mừng! Bạn đã trở thành người bán hàng thành công!"
+    );
+  } catch (err) {
+    console.error("❌ Error becoming seller:", err);
+    next(new ApiError(500, "Lỗi hệ thống khi đăng ký trở thành người bán."));
   }
 };
