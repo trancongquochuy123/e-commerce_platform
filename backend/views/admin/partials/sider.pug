@@ -1,30 +1,56 @@
 .sider
     nav.menu
         ul
+            //- Main
             if role.permissions.includes('dashboard_view') 
+                .section-title Main
                 li
-                    a(href=`/${prefixAdmin}/dashboard`) Trang chủ
+                    a(href=`/${prefixAdmin}/dashboard`)
+                        i.menu-icon.bi.bi-speedometer2
+                        |  Trang chủ
+
+            //- Management
+            if role.permissions.includes('products_view') 
+                .section-title Management
+                li
+                    a(href=`/${prefixAdmin}/products`)
+                        i.menu-icon.bi.bi-box-seam
+                        |  Danh mục sản phẩm
 
             if role.permissions.includes('products_view') 
                 li
-                    a(href=`/${prefixAdmin}/seller/products`) Danh mục sản phẩm
+                    a(href=`/${prefixAdmin}/seller/products`)
+                        i.menu-icon.bi.bi-box-seam
+                        |  Quản lý sản phẩm
 
             if role.permissions.includes('categories_view') 
                 li
-                    a(href=`/${prefixAdmin}/products-category`) Phân loại sản phẩm
+                    a(href=`/${prefixAdmin}/products-category`)
+                        i.menu-icon.bi.bi-tags
+                        |  Phân loại sản phẩm
 
             if role.permissions.includes('roles_view')
                 li
-                    a(href=`/${prefixAdmin}/roles`) Danh mục vai trò
+                    a(href=`/${prefixAdmin}/roles`)
+                        i.menu-icon.bi.bi-people
+                        |  Danh mục vai trò
 
             if role.permissions.includes('roles_permissions') 
                 li    
-                    a(href=`/${prefixAdmin}/roles/permissions`) Phân quyền
+                    a(href=`/${prefixAdmin}/roles/permissions`)
+                        i.menu-icon.bi.bi-shield-lock
+                        |  Phân quyền
 
             if role.permissions.includes('accounts_view') 
                 li
-                    a(href=`/${prefixAdmin}/accounts`) Danh sách tài khoản
+                    a(href=`/${prefixAdmin}/accounts`)
+                        i.menu-icon.bi.bi-person-lines-fill
+                        |  Danh sách tài khoản
 
+            //- Settings
             if role.permissions.includes('settings_view') 
+                .section-title Settings
                 li
-                    a(href=`/${prefixAdmin}/settings/general`) Cài đặt chung
+                    a(href=`/${prefixAdmin}/settings/general`)
+                        i.menu-icon.bi.bi-gear
+                        |  Cài đặt chung

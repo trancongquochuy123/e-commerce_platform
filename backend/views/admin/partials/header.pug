@@ -1,23 +1,16 @@
 Header.header 
     .container-fluid
-        .row.align-items-center
-            .col-3
-                .inner-logo
-                    a(href='/admin/dashboard')
-                        img(src='/images/logo.jpg' alt='Logo' class='logo')
-            .col-9
-                div.header-right.d-flex.justify-content-end.align-items-center
-                    ul.navbar-nav.flex-row.gap-3
-                        li.nav-item 
-                            a.nav-link.text-white.text-uppercase.fw-semibold.px-3.py-2.rounded.border.border-white.border-opacity-25.transition.mr-4(
-                                href=`/${prefixAdmin}/my-account`
-                                onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
-                                onmouseout="this.style.backgroundColor='transparent'"
-                            ) #{user.fullName}                            
-                        li.nav-item
-                            a.nav-link.text-white.text-uppercase.fw-semibold.px-3.py-2.rounded.border.border-white.border-opacity-25.transition(
-                                href=`/${prefixAdmin}/auth/logout`
-                                onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'"
-                                onmouseout="this.style.backgroundColor='transparent'"
-                            ) Logout
+        .d-flex.align-items-center.justify-content-between
+            .inner-logo.d-flex.align-items-center
+                a(href=`/${prefixAdmin}/dashboard`)
+                    img(src='/images/logo.jpg' alt='Logo' class='logo' style='height:36px;object-fit:contain;')
+            //- Right actions: account and logout
+            .header-right.d-flex.align-items-center
+                //- Account chip
+                a.avatar-chip.mr-3(href=`/${prefixAdmin}/my-account`)
+                    span.avatar-circle #{(user && user.fullName ? user.fullName.charAt(0) : 'U')}
+                    span.fw-semibold #{user && user.fullName ? user.fullName : 'User'}
+                //- Logout button with icon
+                a.btn.btn-outline-light.btn-icon(title='Logout', href=`/${prefixAdmin}/auth/logout`)
+                    i.bi.bi-box-arrow-right
 

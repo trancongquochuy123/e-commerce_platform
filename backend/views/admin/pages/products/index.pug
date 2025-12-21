@@ -13,11 +13,14 @@ block main
 
         h1 Product List
         +search(keyword)
+        br
         +sortProducts()
 
         h5.mb-2 Bộ lọc trạng thái:
         div.d-flex.align-items-center.gap-3
             +filter-status(filterStatus)
+
+        br
 
         .row 
             .col-6
