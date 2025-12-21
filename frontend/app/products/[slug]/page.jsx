@@ -86,17 +86,17 @@ export default async function ProductDetail({ params }) {
             </BreadcrumbSeparator>
             <BreadcrumbItem>
               <BreadcrumbLink
-                href="/components"
+                href={`/categories/${product.product_category_id.slug}`}
                 className="text-gray-500 hover:text-gray-700"
               >
-                Components
+                {product.product_category_id.title}
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator>
               <SlashIcon />
             </BreadcrumbSeparator>
             <BreadcrumbItem className="text-gray-900">
-              Incredible Rubber Gloves
+              {product.title}
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

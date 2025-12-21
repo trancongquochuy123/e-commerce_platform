@@ -49,7 +49,7 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E7%94%B5%E8%84%91"
+                    href="/categories/computers"
                   >
                     Computers
                   </a>
@@ -60,7 +60,7 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E6%89%8B%E6%9C%BA"
+                    href="/categories/phones"
                   >
                     Phones
                   </a>
@@ -71,14 +71,14 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%AE%B6%E5%85%B7"
+                    href="/categories/furniture"
                   >
                     Furniture
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%8E%A8%E5%85%B7"
+                    href="/categories/kitchen"
                   >
                     Kitchen
                   </a>
@@ -89,21 +89,21 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%A5%B3%E8%A3%85"
+                    href="/categories/women-s-wear"
                   >
                     Women&apos;s Wear
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?page=1&q=%E7%94%B7%E8%A3%85&tab=all"
+                    href="/categories/men-s-wear"
                   >
                     Men&apos;s Wear
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E9%85%8D%E9%A5%B0"
+                    href="/categories/accessories"
                   >
                     Accessories
                   </a>
@@ -114,28 +114,28 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%A5%B3%E9%9E%8B"
+                    href="/categories/women-s-shoes"
                   >
                     Women&apos;s Shoes
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E7%94%B7%E9%9E%8B"
+                    href="/categories/men-s-shoes"
                   >
                     Men&apos;s Shoes
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E8%BF%90%E5%8A%A8%E8%A3%85%E5%A4%87"
+                    href="/categories/sports"
                   >
                     Sports
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E6%88%B7%E5%A4%96%E7%94%A8%E5%93%81"
+                    href="/categories/outdoor"
                   >
                     Outdoor
                   </a>
@@ -146,7 +146,7 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?page=1&q=%E6%B1%BD%E8%BD%A6&tab=all"
+                    href="/categories/automotive"
                   >
                     Automotive
                   </a>
@@ -267,9 +267,18 @@ export default async function BaotaoService() {
                   )}
 
                   <span className="divider" />
-                  <a href="/store-setup" className="btn-open">
-                    Store setup
-                  </a>
+                  {user && user.isSeller ? (
+                    <a
+                      href="http://localhost:3001/admin/dashboard"
+                      className="btn-open"
+                    >
+                      Store
+                    </a>
+                  ) : (
+                    <a href="/store-setup" className="btn-open">
+                      Store setup
+                    </a>
+                  )}
                 </div>
               </div>
               {user ? (
