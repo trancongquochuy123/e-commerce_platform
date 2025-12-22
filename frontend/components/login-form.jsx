@@ -40,7 +40,7 @@ export function LoginForm({ className, ...props }) {
       });
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.message || "Login failed");
+        throw new Error(data.error.message || "Login failed");
       }
       const responseData = await res.json();
       if (responseData.success) {

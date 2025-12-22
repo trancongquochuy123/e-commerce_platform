@@ -5,6 +5,13 @@ const Product = require("../../../models/product.model.js");
 const ResponseFormatter = require("../../../utils/response.js");
 const ApiError = require("../../../utils/apiError.js");
 
+// ========== STRIPE INTEGRATION ==========
+// Initialize Stripe with test mode keys
+const stripe = require("stripe")(
+  process.env.STRIPE_SECRET_KEY || "sk_test_placeholder"
+);
+// NOTE: Set STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY in your .env file
+
 // [GET] /checkout (Xem trang thanh toán)
 module.exports.index = async (req, res, next) => {
   try {
@@ -108,10 +115,13 @@ module.exports.index = async (req, res, next) => {
 };
 
 // [POST] /checkout/order
+// Handles order creation with optional Stripe payment
+// If paymentMethod='stripe': creates PaymentIntent and requires clientSecret confirmation
+// If paymentMethod='cod': creates order immediately
 module.exports.order = async (req, res, next) => {
   try {
     const cartId = req.cookies.cartId;
-    const userInfo = req.body; // Thông tin người dùng đặt hàng
+    const { userInfo, paymentMethod = "cod", paymentMethodId } = req.body;
 
     if (!cartId) {
       return next(new ApiError(400, "Missing cart ID in cookies."));
@@ -127,6 +137,7 @@ module.exports.order = async (req, res, next) => {
     const productsForOrder = [];
     let insufficientStock = false;
     let invalidProductName = null;
+    let totalAmount = 0; // Track total for Stripe
 
     // 2. Kiểm tra và chuẩn bị dữ liệu sản phẩm cho Order
     for (const item of cart.products) {
@@ -148,14 +159,19 @@ module.exports.order = async (req, res, next) => {
         break;
       }
 
+      // Calculate discounted price and item total
+      const discountedPrice =
+        product.price * (1 - (product.discountPercentage || 0) / 100);
+      const itemTotal = discountedPrice * item.quantity;
+      totalAmount += itemTotal;
+
       productsForOrder.push({
         product_id: product._id,
         discountPercentage: product.discountPercentage || 0,
         quantity: item.quantity,
         price: product.price,
-        // Lấy thêm thông tin cần thiết để Order không phụ thuộc vào Product Model
         title: product.title,
-        // Có thể thêm ảnh, slug... tùy nhu cầu
+        sellerId: product.accountId, // Store seller reference for Stripe split
       });
     }
 
@@ -168,12 +184,55 @@ module.exports.order = async (req, res, next) => {
       );
     }
 
+    // ========== STRIPE PAYMENT INTEGRATION ==========
+    let stripePaymentIntentId = null;
+    let clientSecret = null;
+
+    if (paymentMethod === "stripe") {
+      try {
+        // Convert amount to cents for Stripe
+        const amountInCents = Math.round(totalAmount * 100);
+
+        // Create Stripe PaymentIntent
+        // NOTE: For Stripe Connect, we'll keep payment with platform account
+        // and use automatic transfers to seller accounts
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: amountInCents,
+          currency: "usd",
+          payment_method_types: ["card"],
+          // Metadata to link order to Stripe
+          metadata: {
+            cartId: cartId.toString(),
+            userEmail: userInfo.email || "guest@customer.com",
+          },
+          // For Stripe Connect: automatic transfer to seller (will implement with charges)
+          // transfer_group: `order_${new Date().getTime()}`,
+        });
+
+        stripePaymentIntentId = paymentIntent.id;
+        clientSecret = paymentIntent.client_secret;
+
+        console.log(
+          `✅ Stripe PaymentIntent created: ${stripePaymentIntentId}`
+        );
+      } catch (stripeError) {
+        console.error("❌ Stripe PaymentIntent creation failed:", stripeError);
+        return next(
+          new ApiError(500, `Payment processing failed: ${stripeError.message}`)
+        );
+      }
+    }
+
     // 3. Tạo Order mới
     const newOrder = new Order({
-      cart_id: cartId, // Có thể thay thế bằng user_id nếu người dùng đã đăng nhập
+      cart_id: cartId,
       userInfo: userInfo,
       products: productsForOrder,
-      user_id: req.user?._id || null, // Nếu có middleware xác thực người dùng
+      user_id: req.user?._id || null,
+      method: paymentMethod,
+      stripePaymentIntentId: stripePaymentIntentId,
+      isPaid: paymentMethod === "cod", // COD is immediately "paid" (will be settled in person)
+      // isPaid remains false for Stripe until confirmed
     });
 
     await newOrder.save();
@@ -181,29 +240,26 @@ module.exports.order = async (req, res, next) => {
     // 4. Xóa giỏ hàng sau khi đặt hàng
     await Cart.updateOne({ _id: cartId }, { $set: { products: [] } });
 
-    // 5. Cập nhật tồn kho (Đây là bước quan trọng bị thiếu trong code gốc và cần được bổ sung)
-    // Lưu ý: Cập nhật tồn kho nên được thực hiện sau khi đặt hàng thành công.
-    // Đây chỉ là mô phỏng, bạn nên sử dụng transaction để đảm bảo tính nguyên vẹn.
+    // 5. Prepare response based on payment method
+    const responseData = {
+      orderId: newOrder._id,
+      paymentMethod: paymentMethod,
+    };
 
-    // for (const item of productsForOrder) {
-    //     await Product.updateOne(
-    //         { _id: item.product_id },
-    //         { $inc: { stock: -item.quantity } }
-    //     );
-    // }
+    if (paymentMethod === "stripe" && clientSecret) {
+      // For Stripe orders: return clientSecret for frontend payment confirmation
+      responseData.clientSecret = clientSecret;
+      responseData.message =
+        "PaymentIntent created. Complete payment on frontend.";
+    } else {
+      // For COD: immediately redirect to success page
+      responseData.redirect = "/checkout/success/" + newOrder._id;
+      responseData.message = "Order placed successfully (COD).";
+    }
 
-    // 6. Phản hồi thành công
-    return ResponseFormatter.success(
-      res,
-      {
-        orderId: newOrder._id,
-        redirect: "/checkout/success/" + newOrder._id, // Gợi ý cho client về endpoint tiếp theo
-      },
-      "Order placed successfully."
-    );
+    return ResponseFormatter.success(res, responseData, responseData.message);
   } catch (err) {
     console.error("❌ Error processing order:", err);
-    // Có thể phân biệt lỗi Mongoose và lỗi khác
     next(new ApiError(500, "Failed to process order."));
   }
 };
@@ -248,6 +304,8 @@ module.exports.success = async (req, res, next) => {
         orderId: order._id,
         userInfo: order.userInfo,
         products: detailedProducts,
+        paymentMethod: order.method,
+        isPaid: order.isPaid,
         summary: {
           totalPrice: parseFloat(totalPrice.toFixed(2)),
           // Có thể thêm các trường khác như shipping fee, tax...
@@ -258,5 +316,113 @@ module.exports.success = async (req, res, next) => {
   } catch (err) {
     console.error("❌ Error fetching order details:", err);
     next(new ApiError(500, "Failed to retrieve order details."));
+  }
+};
+
+// ========== STRIPE PAYMENT CONFIRMATION ==========
+
+// [POST] /checkout/confirm-payment
+// Frontend calls this AFTER user confirms payment with Stripe
+// to verify PaymentIntent status and mark order as paid
+module.exports.confirmPayment = async (req, res, next) => {
+  try {
+    const { orderId } = req.body;
+
+    if (!orderId) {
+      return next(new ApiError(400, "Missing orderId in request."));
+    }
+
+    // 1. Find order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return next(new ApiError(404, "Order not found."));
+    }
+
+    if (!order.stripePaymentIntentId) {
+      return next(new ApiError(400, "Order does not have Stripe payment."));
+    }
+
+    // 2. Check PaymentIntent status from Stripe
+    try {
+      const paymentIntent = await stripe.paymentIntents.retrieve(
+        order.stripePaymentIntentId
+      );
+
+      // 3. If payment succeeded, mark order as paid
+      if (paymentIntent.status === "succeeded") {
+        order.isPaid = true;
+        order.paidAt = new Date();
+        await order.save();
+
+        console.log(
+          `✅ Order ${orderId} marked as paid. PaymentIntent: ${paymentIntent.id}`
+        );
+
+        // ========== STRIPE CONNECT: TRANSFER TO SELLER ==========
+        // For each product, transfer 90% to seller, keep 10% platform fee
+        // This happens AFTER payment is confirmed
+        try {
+          for (const product of order.products) {
+            const discountedPrice =
+              product.price * (1 - (product.discountPercentage || 0) / 100);
+            const itemTotal = Math.round(
+              discountedPrice * product.quantity * 100
+            ); // Convert to cents
+            const sellerAmount = Math.round(itemTotal * 0.9); // 90% to seller
+
+            // TODO: Create Transfer to seller's Stripe Connected Account
+            // This requires seller's Stripe account ID (stripeAccountId) in Account model
+            // For now, logging the calculation
+            console.log(
+              `📤 Transfer pending - Product ${product.product_id}: ${sellerAmount} cents to seller ${product.sellerId}`
+            );
+
+            // IMPLEMENTATION FOR PRODUCTION:
+            // await stripe.transfers.create({
+            //   amount: sellerAmount,
+            //   currency: 'usd',
+            //   destination: seller.stripeAccountId, // Requires Account.stripeAccountId field
+            //   transfer_group: `order_${orderId}`,
+            //   metadata: { orderId: orderId.toString(), productId: product.product_id.toString() }
+            // });
+          }
+        } catch (transferError) {
+          console.error(
+            "⚠️  Transfer to seller failed (non-critical):",
+            transferError.message
+          );
+          // Continue - payment is confirmed even if transfer fails
+          // In production, you'd retry this separately
+        }
+
+        return ResponseFormatter.success(
+          res,
+          {
+            orderId: order._id,
+            isPaid: true,
+            redirect: `/checkout/success/${orderId}`,
+            message: "Payment confirmed successfully.",
+          },
+          "Payment confirmed successfully."
+        );
+      } else if (paymentIntent.status === "requires_action") {
+        return next(new ApiError(402, "Payment requires additional action."));
+      } else {
+        return next(
+          new ApiError(402, `Payment failed. Status: ${paymentIntent.status}`)
+        );
+      }
+    } catch (stripeError) {
+      console.error(
+        "❌ Stripe PaymentIntent verification failed:",
+        stripeError
+      );
+      return next(
+        new ApiError(500, `Failed to verify payment: ${stripeError.message}`)
+      );
+    }
+  } catch (err) {
+    console.error("❌ Error confirming payment:", err);
+    next(new ApiError(500, "Failed to confirm payment."));
   }
 };

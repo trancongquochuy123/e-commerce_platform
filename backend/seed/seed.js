@@ -749,7 +749,7 @@ const seedDatabase = async () => {
       10000
     );
     const carts = await seedCarts(users, products, 5);
-    await seedOrders(carts, products, users, 10);
+    // await seedOrders(carts, products, users, 10);
     await seedForgotPasswords(3);
     await seedSettingsGeneral();
     console.log("\n✨ Database seeding completed successfully!\n");
