@@ -18,6 +18,9 @@ const multer = require('multer');
 const favicon = require('serve-favicon');
 const upload = multer({ dest: 'uploads/' }); // Cấu hình cơ bản
 
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+
 // Import logger tùy chỉnh (giả định file này tồn tại)
 const logger = require('./src/shared/logger.js');
 
@@ -39,6 +42,7 @@ const { errorHandler, notFound } = require('./src/api/v1/middlewares/errorHandle
 database.connect();
 
 const app = express();
+
 const port = process.env.PORT || 3000;
 
 // ======================
@@ -69,6 +73,18 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET || 'huydeptrai'));
 app.use(methodOverride('_method'));
+
+// ======================
+// SWAGGER DOCUMENTATION
+// ======================
+app.use(
+    '/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+        explorer: true
+    })
+);
+
 
 // ======================
 // SESSION, FLASH VÀ FAVICON
