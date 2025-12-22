@@ -12,6 +12,21 @@ const stripe = require("stripe")(
 );
 // NOTE: Set STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY in your .env file
 
+// Helper: decrement product stock after successful payment
+async function decrementProductStock(products) {
+  // products: [{ product_id, quantity }]
+  if (!products || !products.length) return;
+
+  const ops = products.map((item) => ({
+    updateOne: {
+      filter: { _id: item.product_id },
+      update: { $inc: { stock: -Math.abs(item.quantity || 0) } },
+    },
+  }));
+
+  await Product.bulkWrite(ops);
+}
+
 // [GET] /checkout (Xem trang thanh toán)
 module.exports.index = async (req, res, next) => {
   try {
@@ -237,10 +252,17 @@ module.exports.order = async (req, res, next) => {
 
     await newOrder.save();
 
-    // 4. Xóa giỏ hàng sau khi đặt hàng
+    // 4. Giảm tồn kho ngay khi thanh toán thành công (COD)
+    if (paymentMethod === "cod") {
+      await decrementProductStock(productsForOrder);
+      newOrder.paidAt = new Date();
+      await newOrder.save();
+    }
+
+    // 5. Xóa giỏ hàng sau khi đặt hàng
     await Cart.updateOne({ _id: cartId }, { $set: { products: [] } });
 
-    // 5. Prepare response based on payment method
+    // 6. Prepare response based on payment method
     const responseData = {
       orderId: newOrder._id,
       paymentMethod: paymentMethod,
@@ -338,6 +360,20 @@ module.exports.confirmPayment = async (req, res, next) => {
       return next(new ApiError(404, "Order not found."));
     }
 
+    // Already paid (idempotent): return success without altering stock again
+    if (order.isPaid) {
+      return ResponseFormatter.success(
+        res,
+        {
+          orderId: order._id,
+          isPaid: true,
+          redirect: `/checkout/success/${orderId}`,
+          message: "Payment already confirmed.",
+        },
+        "Payment already confirmed."
+      );
+    }
+
     if (!order.stripePaymentIntentId) {
       return next(new ApiError(400, "Order does not have Stripe payment."));
     }
@@ -350,6 +386,9 @@ module.exports.confirmPayment = async (req, res, next) => {
 
       // 3. If payment succeeded, mark order as paid
       if (paymentIntent.status === "succeeded") {
+        // Decrement stock for all products in the order
+        await decrementProductStock(order.products);
+
         order.isPaid = true;
         order.paidAt = new Date();
         await order.save();
