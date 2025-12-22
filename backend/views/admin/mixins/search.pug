@@ -1,10 +1,14 @@
+//- Mixin Tìm kiếm: Nối liền Input và Button
 mixin search(keyword)
-    form(class="d-flex" role="search" id="form-search")
-        input.form-control.form-control-sm.custom-search-input.mr-2(
-            type="text", 
-            name="keyword",
-            placeholder="Tìm kiếm...", 
-            aria-label="Search"
-            value=keyword
-        )
-        button.btn.btn-outline-primary.btn-sm(type="submit") Tìm kiếm
+    form(id="form-search")
+        .input-group
+            input.form-control(
+                type="text", 
+                name="keyword",
+                placeholder="Nhập từ khóa...", 
+                value=keyword
+            )
+            button.btn.btn-outline-primary(type="submit")
+                i.fa-solid.fa-magnifying-glass.me-1
+                | Tìm
+

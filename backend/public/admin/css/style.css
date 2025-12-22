@@ -1,434 +1,1356 @@
-/* Header */
+/* ==================== GOOGLE MATERIAL DESIGN VARIABLES ==================== */
+:root {
+  /* Google Colors */
+  --google-blue: #1a73e8;
+  --google-blue-hover: #1765cc;
+  --google-blue-light: #e8f0fe;
+  --google-red: #d93025;
+  --google-red-hover: #c5221f;
+  --google-red-light: #fce8e6;
+  --google-green: #1e8e3e;
+  --google-green-hover: #188038;
+  --google-green-light: #e6f4ea;
+  --google-yellow: #f9ab00;
+  --google-yellow-hover: #e37400;
+  --google-yellow-light: #fef7e0;
+  --google-grey-50: #f8f9fa;
+  --google-grey-100: #f1f3f4;
+  --google-grey-200: #e8eaed;
+  --google-grey-300: #dadce0;
+  --google-grey-400: #bdc1c6;
+  --google-grey-500: #9aa0a6;
+  --google-grey-600: #80868b;
+  --google-grey-700: #5f6368;
+  --google-grey-800: #3c4043;
+  --google-grey-900: #202124;
+  
+  /* Shadows - Google Material */
+  --shadow-1: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  --shadow-2: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
+  --shadow-3: 0 4px 8px 3px rgba(60, 64, 67, 0.15), 0 1px 3px rgba(60, 64, 67, 0.3);
+  --shadow-4: 0 8px 12px 6px rgba(60, 64, 67, 0.15), 0 4px 4px rgba(60, 64, 67, 0.3);
+  
+  /* Typography - Google Sans */
+  --font-google: 'Google Sans', 'Roboto', 'Segoe UI', system-ui, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-standard: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-complex: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-google);
+  background: var(--google-grey-50);
+  color: var(--google-grey-800);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==================== HEADER (Google Style) ==================== */
 .header {
-    background: #000;
-    border-bottom: 1px solid #ccc;
-    padding: 10px 20px;
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    display: flex;
-    align-items: center;
-    height: 60px;
-    /* Cố định chiều cao cho header */
+  background: white;
+  border-bottom: 1px solid var(--google-grey-200);
+  padding: 0 24px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-1);
 }
 
-/* Logo trong Header */
+.header .inner-logo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .header .inner-logo img {
-    max-width: 100%;
-    max-height: 50px;
-    display: block;
+  max-height: 32px;
+  transition: var(--transition-fast);
 }
 
-/* Tổng thể Body chia layout */
+.header .inner-logo img:hover {
+  opacity: 0.8;
+}
+
+.header-title {
+  color: var(--google-grey-700);
+  font-size: 22px;
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0;
+}
+
+/* ==================== LAYOUT ==================== */
 .body {
-    display: flex;
-    min-height: 100vh;
-    background-color: #f5f5f5;
+  display: flex;
+  min-height: 100vh;
+  padding-top: 64px;
 }
 
-/* Sider */
+/* ==================== SIDEBAR (Google Material) ==================== */
 .body .sider {
-    width: 250px;
-    height: calc(100vh - 60px);
-    position: fixed;
-    top: 60px;
-    left: 0;
-    background-color: #2c3e50;
-    color: #ecf0f1;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    /* Nếu nội dung sider dài thì cho cuộn */
+  width: 256px;
+  height: calc(100vh - 64px);
+  position: fixed;
+  top: 64px;
+  left: 0;
+  background: white;
+  border-right: 1px solid var(--google-grey-200);
+  padding: 8px 0;
+  overflow-y: auto;
+  transition: var(--transition-standard);
 }
 
-/* Main content */
-.body .main {
-    margin-left: 250px;
-    /* Cách sider ra */
-    padding: 30px;
-    background-color: #fff;
-    flex-grow: 1;
-    overflow-y: auto;
-    min-height: calc(100vh - 60px);
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
-    /* Đổ bóng nhẹ trong main */
-    border-radius: 8px;
+.sider::-webkit-scrollbar {
+  width: 8px;
 }
 
-/* Menu trong Sider */
+.sider::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sider::-webkit-scrollbar-thumb {
+  background: var(--google-grey-400);
+  border-radius: 4px;
+}
+
+.sider::-webkit-scrollbar-thumb:hover {
+  background: var(--google-grey-500);
+}
+
 .sider .logo {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 40px;
-    text-align: center;
+  font-size: 20px;
+  font-weight: var(--font-weight-medium);
+  color: var(--google-grey-700);
+  padding: 16px 24px;
+  margin-bottom: 8px;
 }
 
 .sider nav.menu ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  list-style: none;
+  padding: 0;
 }
 
 .sider nav.menu li {
-    margin-bottom: 20px;
+  margin: 0;
 }
 
 .sider nav.menu a {
-    display: block;
-    text-decoration: none;
-    color: #ecf0f1;
-    font-size: 18px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    transition: background 0.3s, color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: var(--google-grey-700);
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  padding: 10px 24px;
+  margin: 0 8px;
+  border-radius: 24px;
+  transition: var(--transition-fast);
+  position: relative;
 }
 
 .sider nav.menu a:hover {
-    background-color: #34495e;
-    color: #1abc9c;
+  background: var(--google-grey-100);
 }
 
-/* Start table */
+.sider nav.menu a.active {
+  background: var(--google-blue-light);
+  color: var(--google-blue);
+}
+
+.sider nav.menu a:active {
+  background: var(--google-grey-200);
+}
+
+/* ==================== MAIN CONTENT ==================== */
+.body .main {
+  margin-left: 256px;
+  padding: 24px;
+  flex-grow: 1;
+  background: var(--google-grey-50);
+  min-height: calc(100vh - 64px);
+}
+
+.main-header {
+  margin-bottom: 24px;
+}
+
+.main-header h1 {
+  font-size: 28px;
+  font-weight: var(--font-weight-regular);
+  color: var(--google-grey-900);
+  margin-bottom: 4px;
+  letter-spacing: 0;
+}
+
+.main-header p {
+  color: var(--google-grey-600);
+  font-size: 14px;
+}
+
+/* ==================== CARDS (Material Design) ==================== */
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--google-grey-200);
+  transition: var(--transition-standard);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-2);
+}
+
+/* ==================== TABLE (Google Material) ==================== */
+.table-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--google-grey-200);
+}
+
+.table-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--google-grey-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: white;
+}
+
+.table-header h2 {
+  font-size: 20px;
+  font-weight: var(--font-weight-medium);
+  color: var(--google-grey-900);
+  letter-spacing: 0;
+}
+
 .product-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin-top: 20px;
-    background: #ffffff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
 }
 
 .product-table thead {
-    background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%);
-    color: #ecf0f1;
+  background: var(--google-grey-50);
+  border-bottom: 1px solid var(--google-grey-200);
 }
 
-.product-table th,
-.product-table td {
-    padding: 14px 24px;
-    text-align: left;
-    border-bottom: 1px solid #eaeaea;
-    font-size: 15px;
+.product-table thead th {
+  padding: 12px 24px;
+  text-align: left;
+  font-weight: var(--font-weight-medium);
+  font-size: 12px;
+  color: var(--google-grey-700);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border: none;
 }
 
 .product-table tbody tr {
-    transition: background-color 0.3s, transform 0.2s;
+  border-bottom: 1px solid var(--google-grey-200);
+  transition: var(--transition-fast);
+}
+
+.product-table tbody tr:last-child {
+  border-bottom: none;
 }
 
 .product-table tbody tr:hover {
-    background-color: #f7f9fa;
-    transform: scale(1.01);
+  background: var(--google-grey-50);
 }
 
+.product-table td {
+  padding: 16px 24px;
+  color: var(--google-grey-800);
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.product-table td:first-child {
+  font-weight: var(--font-weight-medium);
+  color: var(--google-grey-900);
+}
+
+/* Product Image */
+.product-image {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--google-grey-200);
+  transition: var(--transition-fast);
+}
+
+.product-image:hover {
+  transform: scale(2);
+  box-shadow: var(--shadow-3);
+  z-index: 10;
+}
+
+/* Table Links */
 .product-table a {
-    color: #3498db;
-    text-decoration: none;
-    transition: color 0.3s;
+  color: var(--google-blue);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: var(--transition-fast);
 }
 
 .product-table a:hover {
-    color: #1abc9c;
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
-/* Base button style */
-a.btn,
-button.btn {
-    display: inline-block;
-    padding: 8px 16px;
-    margin-right: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s, box-shadow 0.3s;
-    /* color: #fff; */
+/* ==================== BUTTONS (Google Material) ==================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 24px;
+  height: 36px;
+  font-size: 14px;
+  font-weight: var(--font-weight-medium);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: 0.25px;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Edit button */
-a.btn-edit {
-    background-color: #3498db;
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
 }
 
-a.btn-edit:hover {
-    color: black;
-    text-decoration: none;
-    background-color: #2980b9;
-    box-shadow: 0 0 10px rgba(41, 128, 185, 0.6);
+.btn:active::before {
+  width: 300px;
+  height: 300px;
 }
 
-/* Delete button */
+.btn:focus {
+  outline: none;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 2px white, 0 0 0 4px var(--google-blue);
+}
+
+/* Primary Button - Filled */
+.btn-primary {
+  background: var(--google-blue);
+  color: white;
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+}
+
+.btn-primary:hover {
+  background: var(--google-blue-hover);
+  box-shadow: var(--shadow-2);
+}
+
+.btn-primary:active {
+  background: #1557b0;
+}
+
+/* Edit Button */
+.btn-edit {
+  background: var(--google-blue);
+  color: white;
+}
+
+.btn-edit:hover {
+  background: var(--google-blue-hover);
+  box-shadow: var(--shadow-2);
+}
+
+/* Delete Button */
 .btn-delete {
-    background-color: #e74c3c;
+  background: var(--google-red);
+  color: white;
 }
 
 .btn-delete:hover {
-    background-color: #c0392b;
-    box-shadow: 0 0 10px rgba(192, 57, 43, 0.6);
+  background: var(--google-red-hover);
+  box-shadow: var(--shadow-2);
 }
 
-/* Status badge */
-.product-table .status {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: bold;
-    text-align: center;
-    color: #fff;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s;
-}
-
-.product-table .status.available {
-    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-}
-
-.product-table .status.out-of-stock {
-    background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
-}
-
-.product-table .status:hover {
-    transform: scale(1.05);
-}
-
-.product-image {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-right: 10px;
-}
-
+/* Outlined Button */
 .btn-outline-primary {
-    color: #0d6efd;
-    /* Chữ xanh */
-    border-color: #0d6efd;
-    /* Viền xanh */
+  background: transparent;
+  border: 1px solid var(--google-grey-300);
+  color: var(--google-blue);
 }
 
-.btn-outline-primary:hover,
+.btn-outline-primary:hover {
+  background: var(--google-blue-light);
+  border-color: var(--google-blue);
+}
+
 .btn-outline-primary.active,
-.btn-outline-primary:active,
-.page-item.active {
-    background-color: #0d6efd;
-    /* Nền xanh */
-    color: #fff;
-    /* Chữ trắng */
-    border-color: #0d6efd;
-    /* Viền xanh */
+.btn-outline-primary:active {
+  background: var(--google-blue-light);
+  border-color: var(--google-blue);
+}
+
+/* Text Button */
+.custom-outline-dark {
+  background: transparent;
+  border: 1px solid var(--google-grey-300);
+  color: var(--google-grey-700);
+}
+
+.custom-outline-dark:hover {
+  background: var(--google-grey-100);
+}
+
+.custom-outline-dark:active {
+  background: var(--google-grey-200);
+}
+
+/* ==================== STATUS CHIPS (Material) ==================== */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.3px;
+  transition: var(--transition-fast);
+}
+
+.status.available {
+  background: var(--google-green-light);
+  color: var(--google-green);
+}
+
+.status.out-of-stock {
+  background: var(--google-yellow-light);
+  color: #c26d00;
+}
+
+/* ==================== SEARCH & FILTERS ==================== */
+.search-filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .custom-search-input {
-    width: 50%;
-    border-color: #0d6efd;
-    /* Màu viền xanh (Bootstrap primary) */
-    color: #0d6efd;
-    /* Text màu xanh nếu người dùng nhập */
+  flex: 1;
+  min-width: 280px;
+  padding: 10px 16px;
+  border: 1px solid var(--google-grey-300);
+  border-radius: 4px;
+  font-size: 14px;
+  transition: var(--transition-fast);
+  background: white;
+  font-family: var(--font-google);
 }
 
-.custom-search-input::placeholder {
-    color: #0d6efd;
-    /* Placeholder màu xanh */
-    opacity: 1;
-    /* Đảm bảo màu hiển thị rõ */
+.custom-search-input:hover {
+  border-color: var(--google-grey-400);
+  background: var(--google-grey-50);
 }
 
 .custom-search-input:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  outline: none;
+  border-color: var(--google-blue);
+  background: white;
 }
 
+.custom-search-input::placeholder {
+  color: var(--google-grey-500);
+}
+
+/* ==================== FORM CHANGE MULTI ==================== */
 .form-change-multi {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-    padding: 1rem;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--google-grey-200);
+  flex-wrap: wrap;
 }
 
 .form-change-multi .form-group {
-    display: flex;
-    flex-direction: row;
-    min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .form-change-multi .form-select,
 .form-change-multi .form-control {
-    display: flex;
-    width: 50%;
-    padding: 0.5rem 0.75rem;
-    font-size: 1rem;
-    border-radius: 6px;
-    border: 1px solid #ced4da;
-    transition: border-color 0.2s;
+  padding: 8px 12px;
+  border: 1px solid var(--google-grey-300);
+  border-radius: 4px;
+  font-size: 14px;
+  transition: var(--transition-fast);
+  background: white;
+  font-family: var(--font-google);
+  height: 36px;
 }
 
-.form-change-multi .form-control {
-    width: 50%;
+.form-change-multi .form-select:hover,
+.form-change-multi .form-control:hover {
+  border-color: var(--google-grey-400);
+  background: var(--google-grey-50);
 }
-
-.form-change-multi .form-select {
-    width: 20%;
-}
-
 
 .form-change-multi .form-select:focus,
 .form-change-multi .form-control:focus {
-    border-color: #86b7fe;
-    outline: none;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  outline: none;
+  border-color: var(--google-blue);
+  background: white;
 }
 
-.form-change-multi button.btn {
-    min-width: 100px;
-    padding: 0.5rem 1rem;
+/* ==================== PAGINATION (Material) ==================== */
+.pagination {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-top: 24px;
+  flex-wrap: wrap;
 }
 
+.page-item {
+  border-radius: 4px;
+}
 
-/* End table */
+.page-item .page-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border: none;
+  color: var(--google-grey-700);
+  font-weight: var(--font-weight-medium);
+  font-size: 14px;
+  transition: var(--transition-fast);
+  border-radius: 4px;
+  text-decoration: none;
+}
 
-/* Alert */
+.page-item .page-link:hover {
+  background: var(--google-grey-100);
+}
+
+.page-item.active .page-link {
+  background: var(--google-blue);
+  color: white;
+}
+
+.page-item.disabled .page-link {
+  color: var(--google-grey-400);
+  cursor: not-allowed;
+}
+
+/* ==================== SNACKBAR/ALERTS (Material) ==================== */
 .alert {
-    position: fixed;
-    min-width: 300px;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-    padding: 15px 40px 15px 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  min-width: 288px;
+  max-width: 568px;
+  padding: 14px 16px;
+  border-radius: 4px;
+  box-shadow: var(--shadow-3);
+  z-index: 9999;
+  animation: slideInUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+  line-height: 20px;
 }
 
-.alert-hidden {
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
     opacity: 0;
-    transform: translateY(-20px);
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.alert-success {
+  background: var(--google-grey-800);
+  color: white;
+}
+
+.alert-danger {
+  background: var(--google-red);
+  color: white;
+}
+
+.alert-warning {
+  background: var(--google-yellow);
+  color: var(--google-grey-900);
+}
+
+.alert-info {
+  background: var(--google-blue);
+  color: white;
 }
 
 .close-alert {
-    position: absolute;
-    top: 0;
-    right: 10px;
-    cursor: pointer;
-    font-size: 18px;
-    color: #000;
+  cursor: pointer;
+  font-size: 20px;
+  color: inherit;
+  opacity: 0.7;
+  transition: var(--transition-fast);
+  background: none;
+  border: none;
+  padding: 4px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  min-width: 24px;
+  height: 24px;
 }
 
-/*End Alert */
+.close-alert:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
 
-/* Create Form */
-/* product.css */
+.alert-hidden {
+  animation: slideOutDown 0.2s ease-in forwards;
+}
 
+@keyframes slideOutDown {
+  to {
+    transform: translateY(150%);
+    opacity: 0;
+  }
+}
+
+/* ==================== FORMS (Material Design) ==================== */
 form#create-product-form {
-    background-color: #fff;
-    padding: 24px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-1);
+  border: 1px solid var(--google-grey-200);
 }
 
 form#create-product-form .form-group {
-    margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 form#create-product-form label {
-    font-weight: 600;
-    margin-bottom: 4px;
-    display: inline-block;
+  font-weight: var(--font-weight-medium);
+  color: var(--google-grey-700);
+  margin-bottom: 8px;
+  display: block;
+  font-size: 14px;
+  letter-spacing: 0.1px;
 }
 
-form#create-product-form input.form-control,
+form#create-product-form .form-control,
 form#create-product-form textarea.form-control,
 form#create-product-form select.form-control {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 8px 10px;
-    width: 100%;
-    transition: border-color 0.3s ease;
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid var(--google-grey-300);
+  border-radius: 4px;
+  font-size: 14px;
+  transition: var(--transition-fast);
+  background: white;
+  font-family: var(--font-google);
+  color: var(--google-grey-900);
 }
 
-form#create-product-form input.form-control:focus,
+form#create-product-form .form-control:hover,
+form#create-product-form textarea.form-control:hover,
+form#create-product-form select.form-control:hover {
+  border-color: var(--google-grey-400);
+  background: var(--google-grey-50);
+}
+
+form#create-product-form .form-control:focus,
 form#create-product-form textarea.form-control:focus,
 form#create-product-form select.form-control:focus {
-    border-color: #0d6efd;
-    outline: none;
+  outline: none;
+  border-color: var(--google-blue);
+  background: white;
+  box-shadow: 0 0 0 1px var(--google-blue);
 }
 
-form#create-product-form button.btn-primary {
-    padding: 10px 20px;
-    font-weight: 600;
-    border-radius: 6px;
+form#create-product-form textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
 }
 
-form#create-product-form .text-end {
-    text-align: right;
+/* Image Preview */
+.form-img-preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 200px;
+  border-radius: 8px;
+  background: var(--google-grey-50);
+  border: 1px dashed var(--google-grey-300);
+  overflow: hidden;
+  transition: var(--transition-fast);
 }
 
-@media (max-width: 768px) {
-    form#create-product-form .row>[class*="col-"] {
-        flex: 0 0 100%;
-        max-width: 100%;
-    }
+.form-img-preview:hover {
+  border-color: var(--google-grey-400);
+  background: var(--google-grey-100);
 }
 
 .image-preview {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: auto;
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 4px;
+  object-fit: contain;
 }
 
 .image-preview[src=""] {
-    display: none;
+  display: none;
 }
 
 .close-button {
-    position: absolute;
-    top: 77px;
-    right: 15px;
-    border-radius: 2px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    text-color: #000;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--google-grey-800);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: var(--transition-fast);
+  box-shadow: var(--shadow-2);
 }
 
-.form-img-preview {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.close-button:hover {
+  background: var(--google-grey-900);
+  box-shadow: var(--shadow-3);
+}
+
+/* ==================== ELEVATION (Material Design) ==================== */
+.elevation-0 {
+  box-shadow: none;
+}
+
+.elevation-1 {
+  box-shadow: var(--shadow-1);
+}
+
+.elevation-2 {
+  box-shadow: var(--shadow-2);
+}
+
+.elevation-3 {
+  box-shadow: var(--shadow-3);
+}
+
+.elevation-4 {
+  box-shadow: var(--shadow-4);
+}
+
+/* ==================== RIPPLE EFFECT ==================== */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.ripple:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .body .sider {
+    transform: translateX(-100%);
+  }
+  
+  .body .sider.active {
+    transform: translateX(0);
+    box-shadow: var(--shadow-4);
+  }
+  
+  .body .main {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 16px;
+    height: 56px;
+  }
+  
+  .body {
+    padding-top: 56px;
+  }
+  
+  .body .sider {
+    top: 56px;
+    height: calc(100vh - 56px);
+    width: 240px;
+  }
+  
+  .body .main {
+    padding: 16px;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .product-table {
+    min-width: 800px;
+  }
+  
+  .product-table th,
+  .product-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  
+  .alert {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    min-width: auto;
+  }
+  
+  .form-change-multi {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .form-change-multi .form-group {
     width: 100%;
-    height: auto;
-    border-radius: 8px;
-    background-color: #f9f9f9;
+  }
+  
+  .search-filter-bar {
+    flex-direction: column;
+  }
+  
+  .custom-search-input {
+    width: 100%;
+  }
 }
 
-.form-control {
-    height: 2.8rem !important;
+@media (max-width: 480px) {
+  .main-header h1 {
+    font-size: 22px;
+  }
+  
+  .btn {
+    padding: 0 16px;
+    height: 32px;
+    font-size: 13px;
+  }
+  
+  .product-image {
+    width: 40px;
+    height: 40px;
+  }
 }
 
-/* End Create Form */
-
-
-.custom-outline-dark {
-    background-color: #fffbe6;
-    /* nền kem nhẹ */
-    border: 1px solid #000 !important;
-    /* viền đen */
-    color: #000 !important;
-    /* chữ đen */
-    transition: 0.2s ease-in-out;
+/* ==================== UTILITIES ==================== */
+.text-center {
+  text-align: center;
 }
 
-.custom-outline-dark:hover {
-    background-color: #f1eac2;
-    /* sáng hơn khi hover */
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+.text-end {
+  text-align: right;
+}
+
+.mt-3 {
+  margin-top: 16px;
+}
+
+.mb-3 {
+  margin-bottom: 16px;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.gap-2 {
+  gap: 8px;
+}
+
+/* ==================== LOADING (Material) ==================== */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--google-grey-300);
+  border-radius: 50%;
+  border-top-color: var(--google-blue);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================== FOCUS STATES ==================== */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--google-blue);
+  outline-offset: 2px;
+}
+
+/* ==================== BOOTSTRAP STYLE BUTTONS (Google Material) ==================== */
+
+/* 1. Secondary Button (Thường dùng cho nút Hủy, Quay lại, Chi tiết) */
+.btn-secondary {
+  background: white;
+  border: 1px solid var(--google-grey-300);
+  color: var(--google-grey-700);
+  box-shadow: none;
+}
+
+.btn-secondary:hover {
+  background: var(--google-grey-100);
+  border-color: var(--google-grey-400);
+  color: var(--google-grey-900);
+  box-shadow: var(--shadow-1);
+}
+
+.btn-secondary:active {
+  background: var(--google-grey-200);
+  box-shadow: none;
+}
+
+/* 2. Success Button (Thường dùng cho Lưu, Xác nhận) */
+.btn-success {
+  background: var(--google-green);
+  color: white;
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-1);
+}
+
+.btn-success:hover {
+  background: var(--google-green-hover);
+  box-shadow: var(--shadow-2);
+}
+
+/* 3. Danger Button (Đồng bộ với btn-delete hiện có) */
+.btn-danger {
+  background: var(--google-red);
+  color: white;
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-1);
+}
+
+.btn-danger:hover {
+  background: var(--google-red-hover);
+  box-shadow: var(--shadow-2);
+}
+
+/* 4. Warning Button (Thường dùng cho Edit/Sửa) */
+.btn-warning {
+  background: var(--google-yellow);
+  color: var(--google-grey-900); /* Chữ màu tối để tương phản tốt trên nền vàng */
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-1);
+}
+
+.btn-warning:hover {
+  background: var(--google-yellow-hover);
+  box-shadow: var(--shadow-2);
+}
+
+/* 5. Info Button (Thường dùng cho Xem chi tiết nếu muốn nổi bật hơn secondary) */
+.btn-info {
+  background: var(--google-blue-light);
+  color: var(--google-blue);
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+
+.btn-info:hover {
+  background: #d2e3fc; /* Darker blue light */
+  color: var(--google-blue-hover);
+  box-shadow: var(--shadow-1);
+}
+
+/* 6. Dark Button */
+.btn-dark {
+  background: var(--google-grey-800);
+  color: white;
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-1);
+}
+
+.btn-dark:hover {
+  background: var(--google-grey-900);
+  box-shadow: var(--shadow-2);
+}
+
+/* 7. Button Sizes (Cực kỳ quan trọng cho Table) */
+.btn-sm {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 26px; /* height - 2px border */
+}
+
+.btn-lg {
+  height: 48px;
+  padding: 0 32px;
+  font-size: 16px;
+}
+
+/* 8. Table Action Group (Căn chỉnh khoảng cách các nút trong bảng) */
+td .btn {
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+td .btn:last-child {
+  margin-right: 0;
+}
+
+/* Tinh chỉnh lại nút Edit trong code Pug của bạn để dùng class Bootstrap nếu muốn */
+/* Nếu bạn muốn dùng class .btn-warning thay vì .btn-edit, css trên đã hỗ trợ */
+/* Nếu giữ nguyên .btn-edit nhưng muốn nó giống style Google Yellow: */
+.btn-edit {
+  background: var(--google-yellow-light);
+  color: #e37400; /* Dark orange text */
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+
+.btn-edit:hover {
+  background: var(--google-yellow);
+  color: var(--google-grey-900);
+  box-shadow: var(--shadow-1);
+}
+
+/* ==================== PAGE CONTROLS & TOOLBARS ==================== */
+
+/* --- 1. General Layout Spacing --- */
+/* Tạo khoảng cách giữa các khối chức năng */
+.card-header-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: transparent;
+}
+
+/* --- 2. Search Box Styling --- */
+#form-search {
+  position: relative;
+  width: 100%;
+  max-width: 600px; /* Giới hạn chiều rộng để không quá dài trên màn hình lớn */
+}
+
+#form-search .custom-search-input {
+  height: 40px;
+  padding-left: 16px;
+  border-radius: 4px 0 0 4px; /* Bo góc trái */
+  border: 1px solid var(--google-grey-300);
+  border-right: none; /* Bỏ viền phải để nối liền với nút */
+  box-shadow: none;
+  font-size: 14px;
+}
+
+#form-search .custom-search-input:focus {
+  z-index: 2;
+  border-color: var(--google-blue);
+  box-shadow: 0 0 0 1px var(--google-blue);
+}
+
+#form-search button[type="submit"] {
+  height: 40px;
+  border-radius: 0 4px 4px 0; /* Bo góc phải */
+  border: 1px solid var(--google-blue);
+  background: var(--google-blue-light);
+  color: var(--google-blue);
+  font-weight: 500;
+  padding: 0 20px;
+}
+
+#form-search button[type="submit"]:hover {
+  background: var(--google-blue);
+  color: white;
+}
+
+/* --- 3. Sort Section (Sắp xếp) --- */
+div[sort] {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--google-grey-200);
+  box-shadow: var(--shadow-1);
+}
+
+/* Chỉnh lại thẻ h3 vốn quá to trong Pug thành style label nhỏ gọn */
+div[sort] h3 {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--google-grey-800);
+  margin-bottom: 12px;
+  display: block;
+}
+
+div[sort] select.form-control {
+  height: 40px;
+  border-color: var(--google-grey-300);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+div[sort] select.form-control:focus {
+  border-color: var(--google-blue);
+  box-shadow: 0 0 0 2px var(--google-blue-light);
+}
+
+/* Nút Clear trong phần sort */
+div[sort] button[sort-clear] {
+  font-size: 13px;
+  height: 32px;
+  padding: 0 16px;
+  background: var(--google-grey-200); /* Màu xám nhẹ mặc định */
+  color: var(--google-grey-800);
+  border: none;
+  box-shadow: none;
+}
+
+div[sort] button[sort-clear]:hover {
+  background: var(--google-grey-300);
+}
+
+/* --- 4. Filter Status (Bộ lọc trạng thái) --- */
+/* Style cho nhóm nút Active/Inactive */
+.btn-group {
+  box-shadow: none;
+}
+
+.btn-group .btn {
+  border: 1px solid var(--google-grey-300);
+  color: var(--google-grey-700);
+  font-weight: 500;
+  padding: 8px 20px;
+  background: white;
+}
+
+/* Trạng thái đang chọn (Active) */
+.btn-group .btn.active {
+  background: var(--google-blue-light);
+  color: var(--google-blue);
+  border-color: var(--google-blue);
+  z-index: 1;
+}
+
+.btn-group .btn:hover:not(.active) {
+  background: var(--google-grey-50);
+  border-color: var(--google-grey-400);
+}
+
+/* Bo góc cho nút đầu và cuối */
+.btn-group .btn:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+.btn-group .btn:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+/* Tiêu đề "Bộ lọc trạng thái" */
+h5.mb-2 {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--google-grey-800);
+  margin-bottom: 12px !important;
+}
+
+/* --- 5. Multi Action Form (Hành động hàng loạt) --- */
+.form-change-multi {
+  background: white;
+  border: 1px solid var(--google-grey-300);
+  border-radius: 8px; /* Bo góc giống hình */
+  padding: 6px; /* Padding nhỏ để tạo viền trắng xung quanh */
+  display: flex;
+  gap: 8px;
+  box-shadow: var(--shadow-1);
+  width: fit-content; /* Chỉ rộng bằng nội dung bên trong */
+}
+
+.form-change-multi .form-select {
+  border: none; /* Bỏ viền của select để nó hòa vào box cha */
+  background-color: transparent;
+  height: 36px;
+  min-width: 150px;
+  font-size: 14px;
+  color: var(--google-grey-800);
+}
+
+.form-change-multi .form-select:focus {
+  box-shadow: none;
+}
+
+.form-change-multi button[type="submit"] {
+  height: 36px;
+  padding: 0 24px;
+  border-radius: 4px;
+  font-weight: 500;
+  background: var(--google-blue);
+  border: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.form-change-multi button[type="submit"]:hover {
+  background: var(--google-blue-hover);
+  box-shadow: var(--shadow-2);
+}
+
+/* --- Responsive fixes --- */
+@media (max-width: 768px) {
+  .form-change-multi {
+    width: 100%;
+    flex-direction: row; /* Giữ row trên mobile nếu đủ chỗ */
+  }
+  
+  .form-change-multi .form-select {
+    flex-grow: 1;
+  }
+  
+  #form-search {
+    max-width: 100%;
+  }
+}
+
+/* Label cho các ô input trong bộ lọc */
+.form-label {
+    font-size: 13px;
+    margin-bottom: 6px;
+    display: block;
+    color: var(--google-grey-700);
+}
+
+/* Tinh chỉnh Card Control */
+.card .card-body {
+    padding: 20px 24px;
+}
+
+/* Đảm bảo nút Create Product có icon đẹp */
+.btn i {
+    font-size: 14px;
+}
+
+/* Sửa lại mixin Search để nó fill đầy cột */
+#form-search {
+    width: 100%;
+    max-width: 100%;
+}
+
+#form-search .custom-search-input {
+    width: 100%; /* Đảm bảo input dãn hết cỡ */
+}
+
+/* Sort Area Clean up */
+div[sort] {
+    border: none; /* Bỏ viền cũ nếu có */
+    box-shadow: none; /* Bỏ bóng cũ nếu có */
+    padding: 0;
+    background: transparent;
+}
+
+div[sort] .input-group {
+    display: flex;
+    width: 100%;
+}
+
+div[sort] select {
+    border-radius: 4px 0 0 4px !important;
+}
+
+div[sort] button[sort-clear] {
+    border-radius: 0 4px 4px 0 !important;
+    border: 1px solid var(--google-grey-300);
+    border-left: none;
+    background: var(--google-grey-50);
 }

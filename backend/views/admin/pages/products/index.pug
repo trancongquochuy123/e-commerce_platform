@@ -11,25 +11,43 @@ block main
 
         +alert-success(5000)
 
-        h1 Product List
-        +search(keyword)
-        +sortProducts()
+        //- 1. Header
+        .d-flex.justify-content-between.align-items-center.mb-4
+            h1.h3.mb-0 Product List
 
-        h5.mb-2 Bộ lọc trạng thái:
-        div.d-flex.align-items-center.gap-3
-            +filter-status(filterStatus)
+        //- 2. Control Panel (Card trắng chứa bộ lọc)
+        .card.mb-4.shadow-sm
+            .card-body
+                .row.g-3
+                    //- Cột 1: Tìm kiếm
+                    .col-md-4
+                        label.form-label.fw-bold.text-secondary Tìm kiếm
+                        +search(keyword)
 
-        .row 
-            .col-6
-                +form-change-multi(
-                    `/${prefixAdmin}/products/change-multi?_method=PATCH`
-                )
-            .col-6.text-end
-                if role.permissions.includes('product_create')
-                    a(
-                        href=`/${prefixAdmin}/products/create`
-                        class="btn btn-primary"
-                    ) Create Products
+                    //- Cột 2: Sắp xếp
+                    .col-md-4
+                        label.form-label.fw-bold.text-secondary Sắp xếp theo
+                        +sortProducts()
+
+                    //- Cột 3: Bộ lọc trạng thái
+                    .col-md-4
+                        label.form-label.fw-bold.text-secondary Trạng thái
+                        div
+                            +filter-status(filterStatus)
+
+        //- 3. Action Bar (Nằm ngay trên bảng)
+        .row.align-items-center.mb-3
+            .col-md-6
+                //- Form đổi nhiều trạng thái
+                +form-change-multi(`/${prefixAdmin}/products/change-multi?_method=PATCH`)
+            
+            .col-md-6.text-end
+                if role.permissions.includes('products_create')
+                    a.btn.btn-primary(href=`/${prefixAdmin}/products/create`)
+                        i.fa-solid.fa-plus.me-2
+                        | Tạo mới
+
+
 
         table(
             class="product-table"
@@ -105,7 +123,7 @@ block main
                                     span.available Active
                                 else
                                     span.out-of-stock Inactive
-                            
+
                         td
                             if role.permissions.includes('products_edit')
                                 a(

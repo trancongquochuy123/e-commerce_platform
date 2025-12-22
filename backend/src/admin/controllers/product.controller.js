@@ -1,386 +1,161 @@
 const Product = require("../../models/product.model");
 const ProductCategory = require("../../models/product-category.model");
 const Account = require("../../models/account.model");
-const ResponseFormatter = require("../../utils/response");
-const ApiError = require("../../utils/apiError");
+const systemConfig = require("../../../config/system");
+
+const filterStatusHelper = require("../../utils/filterStatus");
+const searchHelper = require("../../utils/search");
+const paginationHelper = require("../../utils/pagination");
 const { processDescription } = require("../../utils/handleDescriptionImage");
-const { priceNewProduct } = require("../../utils/products");
+const createTreeHelper = require("../../utils/createTree");
 
-/**
- * @desc    Get all products with filters, search, pagination
- * @route   GET /api/v1/admin/products
- * @access  Private (products_view)
- */
-const getAllProducts = async (req, res, next) => {
+// [GET] /products
+module.exports.index = async (req, res) => {
     try {
-        const {
-            page = 1,
-            limit = 20,
-            status,
-            feature,
-            category,
-            keyword,
-            sortBy = 'position',
-            order = 'desc',
-            minPrice,
-            maxPrice
-        } = req.query;
+        const filterStatus = filterStatusHelper(req.query);
 
-        // Build filters
-        const filters = { deleted: false };
+        let findProducts = {
+            deleted: false,
+        };
 
-        if (status && status !== 'all') {
-            filters.status = status;
+        if (req.query.status) {
+            findProducts.status = req.query.status;
         }
 
-        if (feature && feature !== 'all') {
-            filters.feature = feature;
-        }
+        const objectSearch = searchHelper(req.query);
 
-        if (category) {
-            filters.product_category_id = category;
-        }
-
-        if (keyword) {
-            filters.$or = [
-                { title: { $regex: keyword, $options: 'i' } },
-                { sku: { $regex: keyword, $options: 'i' } },
-                { brand: { $regex: keyword, $options: 'i' } }
-            ];
-        }
-
-        if (minPrice || maxPrice) {
-            filters.price = {};
-            if (minPrice) filters.price.$gte = parseFloat(minPrice);
-            if (maxPrice) filters.price.$lte = parseFloat(maxPrice);
+        if (objectSearch.regex) {
+            findProducts.title = objectSearch.regex;
         }
 
         // Pagination
-        const skip = (parseInt(page) - 1) * parseInt(limit);
-        const sortOrder = order === 'asc' ? 1 : -1;
+        const countProducts = await Product.countDocuments(findProducts);
 
-        // Execute queries
-        const [products, totalProducts] = await Promise.all([
-            Product.find(filters)
-                .populate('product_category_id', 'title slug')
-                .populate('createdBy.accountId', 'fullName email')
-                .sort({ [sortBy]: sortOrder })
-                .skip(skip)
-                .limit(parseInt(limit))
-                .lean()
-                .exec(),
-            
-            Product.countDocuments(filters)
-        ]);
-
-        // Calculate prices and add creator info
-        const productsWithDetails = await Promise.all(
-            products.map(async (product) => {
-                // Calculate discounted price
-                product.priceNew = (product.price - (product.price * product.discountPercentage / 100)).toFixed(2);
-
-                // Get last updater info
-                if (product.updatedBy && product.updatedBy.length > 0) {
-                    const lastUpdate = product.updatedBy[product.updatedBy.length - 1];
-                    const updater = await Account.findById(lastUpdate.accountId)
-                        .select('fullName email')
-                        .lean();
-                    
-                    if (updater) {
-                        product.lastUpdatedBy = {
-                            name: updater.fullName,
-                            email: updater.email,
-                            date: lastUpdate.updatedAt
-                        };
-                    }
-                }
-
-                return product;
-            })
-        );
-
-        // Pagination metadata
-        const pagination = {
-            currentPage: parseInt(page),
-            totalPages: Math.ceil(totalProducts / parseInt(limit)),
-            totalItems: totalProducts,
-            limit: parseInt(limit)
-        };
-
-        return ResponseFormatter.paginated(
-            res,
-            productsWithDetails,
-            pagination,
-            'Products retrieved successfully'
-        );
-
-    } catch (error) {
-        console.error('❌ Get all products error:', error);
-        next(new ApiError(500, 'Failed to fetch products'));
-    }
-};
-
-/**
- * @desc    Get single product by ID
- * @route   GET /api/v1/admin/products/:id
- * @access  Private (products_view)
- */
-const getProductById = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-
-        const product = await Product.findOne({
-            _id: id,
-            deleted: false
-        })
-            .populate('product_category_id', 'title slug')
-            .populate('createdBy.accountId', 'fullName email')
-            .lean()
-            .exec();
-
-        if (!product) {
-            throw new ApiError(404, 'Product not found');
-        }
-
-        // Calculate discounted price
-        product.priceNew = (product.price - (product.price * product.discountPercentage / 100)).toFixed(2);
-
-        // Get update history
-        if (product.updatedBy && product.updatedBy.length > 0) {
-            const updateHistory = await Promise.all(
-                product.updatedBy.map(async (update) => {
-                    const account = await Account.findById(update.accountId)
-                        .select('fullName email')
-                        .lean();
-                    
-                    return {
-                        user: account ? {
-                            name: account.fullName,
-                            email: account.email
-                        } : null,
-                        date: update.updatedAt
-                    };
-                })
-            );
-            product.updateHistory = updateHistory.filter(h => h.user);
-        }
-
-        return ResponseFormatter.success(
-            res,
-            product,
-            'Product retrieved successfully'
-        );
-
-    } catch (error) {
-        console.error('❌ Get product by ID error:', error);
-        if (error instanceof ApiError) {
-            return next(error);
-        }
-        next(new ApiError(500, 'Failed to fetch product'));
-    }
-};
-
-/**
- * @desc    Create new product
- * @route   POST /api/v1/admin/products
- * @access  Private (product_create)
- */
-const createProduct = async (req, res, next) => {
-    try {
-        // Parse numeric fields
-        req.body.price = parseFloat(req.body.price);
-        req.body.discountPercentage = parseFloat(req.body.discountPercentage) || 0;
-        req.body.stock = parseInt(req.body.stock);
-
-        // Handle position
-        if (!req.body.position || req.body.position === "") {
-            const countProducts = await Product.countDocuments();
-            req.body.position = countProducts + 1;
-        } else {
-            req.body.position = parseInt(req.body.position);
-        }
-
-        // Process description images (upload to Cloudinary)
-        if (req.body.description) {
-            req.body.description = await processDescription(req.body.description);
-        }
-
-        // Add creator info
-        req.body.createdBy = {
-            accountId: res.locals.user._id,
-            createdAt: new Date()
-        };
-
-        // Handle thumbnail from multer + cloudinary middleware
-        if (req.file && req.file.path) {
-            req.body.thumbnail = req.file.path;
-        }
-
-        // Create product
-        const product = new Product(req.body);
-        await product.save();
-
-        // Populate for response
-        await product.populate('product_category_id', 'title slug');
-
-        return ResponseFormatter.created(
-            res,
+        const objectPagination = paginationHelper(
             {
-                _id: product._id,
-                title: product.title,
-                slug: product.slug,
-                price: product.price,
-                thumbnail: product.thumbnail,
-                category: product.product_category_id
+                currentPage: 1,
+                limitItem: 5,
             },
-            'Product created successfully'
+            req.query,
+            countProducts
         );
+        // End Pagination
 
-    } catch (error) {
-        console.error('❌ Create product error:', error);
-        next(new ApiError(500, 'Failed to create product'));
-    }
-};
+        // Sort 
+        let sort = {};
 
-/**
- * @desc    Update product (partial update)
- * @route   PATCH /api/v1/admin/products/:id
- * @access  Private (products_edit)
- */
-const patchProduct = async (req, res, next) => {
-    try {
-        const { id } = req.params;
+        if (req.query.sortKey && req.query.sortValue) {
+            const { sortKey, sortValue } = req.query;
+            sort[sortKey] = sortValue === 'asc' ? 1 : -1;
+        } else {
+            sort.position = -1;
+        }
+        // End Sort
 
-        // Check if product exists
-        const existingProduct = await Product.findOne({
-            _id: id,
-            deleted: false
+        const products = await Product.find(findProducts)
+            .populate('product_category_id', 'title')
+            .sort(sort)
+            .limit(objectPagination.limitItem)
+            .skip(objectPagination.skip);
+
+        const newProducts = products.map(item => {
+            item.priceNew = (item.price - (item.price * item.discountPercentage) / 100).toFixed(2);
+            return item;
         });
 
-        if (!existingProduct) {
-            throw new ApiError(404, 'Product not found');
-        }
+        // Lỗi do schema của mongoose trả về là một object chứ không phải là một plain JS object (cụ thể hơn
+        // Kiểu	| Có truy cập được position không? | Ghi chú
+        // item (Mongoose document) |	❌ Có thể undefined nếu không trong schema hoặc không được chọn | Mongoose không hiển thị hết các trường tùy config
+        // item.toObject()	| ✅ Truy cập đầy đủ các trường | Plain JavaScript object
+        // )
+        // const newProducts = products.map(item => {
+        //     const plainItem = item.toObject(); // chuyển về plain JS object
 
-        // Parse numeric fields if provided
-        if (req.body.price) req.body.price = parseFloat(req.body.price);
-        if (req.body.discountPercentage !== undefined) {
-            req.body.discountPercentage = parseFloat(req.body.discountPercentage);
-        }
-        if (req.body.stock) req.body.stock = parseInt(req.body.stock);
-        if (req.body.position) req.body.position = parseInt(req.body.position);
+        //     plainItem.priceNew = (plainItem.price - (plainItem.price * plainItem.discountPercentage) / 100).toFixed(2);
 
-        // Process description images
-        if (req.body.description) {
-            req.body.description = await processDescription(req.body.description);
-        }
+        //     console.log(plainItem.position); // now '100'
+        //     plainItem.position = Number(plainItem.position);
+        //     console.log(plainItem.position); // now 100
 
-        // Handle new thumbnail
-        if (req.file && req.file.path) {
-            req.body.thumbnail = req.file.path;
-        }
+        //     return plainItem;
+        // });
 
-        // Remove updatedBy if accidentally included
-        delete req.body.updatedBy;
-        delete req.body.createdBy;
+        for (const product of products) {
+            // Lấy ra thông tin người tạo 
+            const user = await Account.findById(product.createdBy.accountId).select("fullName").lean();
+            if (!user) continue;
+            product.accountFullName = user.fullName;
 
-        // Update product
-        const updatedProduct = await Product.findByIdAndUpdate(
-            id,
-            {
-                ...req.body,
-                $push: {
-                    updatedBy: {
-                        accountId: res.locals.user._id,
-                        updatedAt: new Date()
-                    }
+            // Lấy ra thông tin người update mới nhất
+            const lastUpdated = product.updatedBy[product.updatedBy.length - 1];
+            if (lastUpdated) {
+                const userUpdate = await Account.findById(lastUpdated.accountId).select("fullName").lean();
+                if (userUpdate) {
+                    product.accountUpdateFullName = userUpdate.fullName;
                 }
-            },
-            { new: true, runValidators: true }
-        )
-            .populate('product_category_id', 'title slug')
-            .lean();
-
-        return ResponseFormatter.success(
-            res,
-            updatedProduct,
-            'Product updated successfully'
-        );
-
-    } catch (error) {
-        console.error('❌ Update product error:', error);
-        if (error instanceof ApiError) {
-            return next(error);
+            }
         }
-        next(new ApiError(500, 'Failed to update product'));
+
+        res.render("admin/pages/products/index.pug", {
+            pageTitle: "Products",
+            description: "Welcome to the admin products!",
+            products: newProducts,
+            filterStatus: filterStatus,
+            keyword: objectSearch.keyword,
+            pagination: objectPagination,
+        });
+    } catch (error) {
+        console.error("Error in products index:", error);
+        req.flash('error', 'An error occurred while loading products.');
+        res.redirect(`${systemConfig.prefixAdmin}/products`);
     }
-};
+}
 
-/**
- * @desc    Change product status
- * @route   PATCH /api/v1/admin/products/:id/status
- * @access  Private (products_edit)
- */
-const changeStatus = async (req, res, next) => {
+// [PATCH] admin/products/change-status/:status/:id
+module.exports.changeStatus = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { status } = req.body;
+        const status = req.params.status;
+        const id = req.params.id;
 
-        const product = await Product.findByIdAndUpdate(
-            id,
-            {
-                status,
-                $push: {
-                    updatedBy: {
-                        accountId: res.locals.user._id,
-                        updatedAt: new Date()
-                    }
+        await Product.findByIdAndUpdate(id, {
+            status: status,
+            $push: {
+                updatedBy: {
+                    accountId: res.locals.user._id,
+                    updatedAt: new Date()
                 }
-            },
-            { new: true }
-        ).select('_id title status');
+            }
+        });
 
-        if (!product) {
-            throw new ApiError(404, 'Product not found');
-        }
+        req.flash('success', 'Change status product successfully!');
 
-        return ResponseFormatter.success(
-            res,
-            {
-                _id: product._id,
-                title: product.title,
-                status: product.status
-            },
-            'Product status updated successfully'
-        );
-
+        res.redirect(req.get('referer') || `${systemConfig.prefixAdmin}/products`);
     } catch (error) {
-        console.error('❌ Change status error:', error);
-        if (error instanceof ApiError) {
-            return next(error);
-        }
-        next(new ApiError(500, 'Failed to change product status'));
+        console.error("Error in change status:", error);
+        req.flash('error', 'An error occurred while changing product status.');
+        res.redirect(req.get('referer') || `${systemConfig.prefixAdmin}/products`);
     }
-};
+}
 
-/**
- * @desc    Bulk actions on products
- * @route   POST /api/v1/admin/products/bulk-action
- * @access  Private (products_edit)
- */
-const bulkAction = async (req, res, next) => {
+// [PATCH] admin/products/change-multi
+module.exports.changeMulti = async (req, res) => {
     try {
-        const { action, ids } = req.body;
+        // Validation: Kiểm tra req.body.ids có tồn tại không
+        if (!req.body.ids || req.body.ids.trim() === '') {
+            req.flash('error', 'No products selected.');
+            return res.redirect(req.get('referer') || `${systemConfig.prefixAdmin}/products`);
+        }
 
-        let result;
-        let message;
+        const ids = req.body.ids.split(", ");
+        const type = req.body.type;
 
-        switch (action) {
-            case 'active':
-            case 'inactive':
-                result = await Product.updateMany(
+        switch (type) {
+            case "active":
+            case "inactive":
+                await Product.updateMany(
                     { _id: { $in: ids } },
                     {
-                        status: action,
+                        status: type,
                         $push: {
                             updatedBy: {
                                 accountId: res.locals.user._id,
@@ -389,11 +164,11 @@ const bulkAction = async (req, res, next) => {
                         }
                     }
                 );
-                message = `${result.modifiedCount} products status changed to ${action}`;
+                req.flash('success', `Change status of ${ids.length} product successfully!`);
                 break;
 
-            case 'delete':
-                result = await Product.updateMany(
+            case "delete-all":
+                await Product.updateMany(
                     { _id: { $in: ids } },
                     {
                         deleted: true,
@@ -403,109 +178,195 @@ const bulkAction = async (req, res, next) => {
                         }
                     }
                 );
-                message = `${result.modifiedCount} products deleted successfully`;
+                req.flash('success', `Delete ${ids.length} product successfully!`);
                 break;
 
-            case 'feature':
-                result = await Product.updateMany(
-                    { _id: { $in: ids } },
-                    { feature: '1' }
-                );
-                message = `${result.modifiedCount} products marked as featured`;
-                break;
-
-            case 'unfeature':
-                result = await Product.updateMany(
-                    { _id: { $in: ids } },
-                    { feature: '0' }
-                );
-                message = `${result.modifiedCount} products unmarked as featured`;
+            case "change-position":
+                await Promise.all(ids.map(async (item) => {
+                    let [id, position] = item.split("-");
+                    position = parseInt(position);
+                    await Product.findByIdAndUpdate(id, {
+                        position: position,
+                        $push: {
+                            updatedBy: {
+                                accountId: res.locals.user._id,
+                                updatedAt: new Date()
+                            }
+                        }
+                    });
+                }));
+                req.flash('success', `Change position of ${ids.length} product successfully!`);
                 break;
 
             default:
-                throw new ApiError(400, 'Invalid action');
+                req.flash('error', 'Invalid action type.');
+                break;
         }
 
-        return ResponseFormatter.success(
-            res,
-            {
-                action,
-                affectedCount: result.modifiedCount,
-                totalRequested: ids.length
-            },
-            message
-        );
 
+        res.redirect(req.get('referer') || `${systemConfig.prefixAdmin}/products`);
     } catch (error) {
-        console.error('❌ Bulk action error:', error);
-        if (error instanceof ApiError) {
-            return next(error);
-        }
-        next(new ApiError(500, 'Failed to perform bulk action'));
+        console.error("Error in change multi:", error);
+        req.flash('error', 'An error occurred while updating products.');
+        res.redirect(req.get('referer') || `${systemConfig.prefixAdmin}/products`);
     }
-};
+}
 
-/**
- * @desc    Change product position
- * @route   PATCH /api/v1/admin/products/:id/position
- * @access  Private (products_edit)
- */
-const changePosition = async (req, res, next) => {
+// [DELETE] admin/products/delete/:id
+module.exports.deleteItem = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { position } = req.body;
-
-        const product = await Product.findByIdAndUpdate(
-            id,
-            {
-                position: parseInt(position),
-                $push: {
-                    updatedBy: {
-                        accountId: res.locals.user._id,
-                        updatedAt: new Date()
-                    }
-                }
-            },
-            { new: true }
-        ).select('_id title position');
-
-        if (!product) {
-            throw new ApiError(404, 'Product not found');
-        }
-
-        return ResponseFormatter.success(
-            res,
-            product,
-            'Product position updated successfully'
-        );
-
-    } catch (error) {
-        console.error('❌ Change position error:', error);
-        if (error instanceof ApiError) {
-            return next(error);
-        }
-        next(new ApiError(500, 'Failed to change product position'));
-    }
-};
-
-/**
- * @desc    Toggle featured status
- * @route   PATCH /api/v1/admin/products/:id/feature
- * @access  Private (products_edit)
- */
-const toggleFeature = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-
-        const product = await Product.findById(id).select('feature');
-        if (!product) {
-            throw new ApiError(404, 'Product not found');
-        }
-
-        const newFeatureStatus = product.feature === '1' ? '0' : '1';
+        const id = req.params.id;
 
         await Product.findByIdAndUpdate(id, {
-            feature: newFeatureStatus,
+            deleted: true,
+            deletedBy: {
+                accountId: res.locals.user._id,
+                deletedAt: new Date(),
+            }
+        });
+
+        req.flash('success', 'Delete product successfully!');
+
+        res.redirect(req.get('referer') || `${systemConfig.prefixAdmin}/products`);
+    } catch (error) {
+        console.error("Error in delete item:", error);
+        req.flash('error', 'An error occurred while deleting the product.');
+        res.redirect(req.get('referer') || `${systemConfig.prefixAdmin}/products`);
+    }
+}
+
+// [GET] admin/products/create
+module.exports.create = async (req, res) => {
+    try {
+        let findProducts = {
+            deleted: false,
+        };
+
+        const records = await ProductCategory.find(findProducts);
+
+        const newCategory = createTreeHelper.createTree(records);
+
+        for (const record of records) {
+            if (record.createdBy && record.createdBy.accountId) {
+                const account = await Account.findById(record.createdBy.accountId);
+                if (!account) continue;
+                record.accountFullname = account.fullName;
+            }
+        }
+
+        res.render("admin/pages/products/create.pug", {
+            pageTitle: "Create Product",
+            category: newCategory,
+        });
+    } catch (error) {
+        console.error("Error in create page:", error);
+        req.flash('error', 'An error occurred while loading create page.');
+        res.redirect(`${systemConfig.prefixAdmin}/products`);
+    }
+}
+
+// [POST] admin/products/create
+module.exports.createProduct = async (req, res) => {
+    try {
+        req.body.price = parseFloat(req.body.price);
+        req.body.discountPercentage = parseFloat(req.body.discountPercentage);
+        req.body.stock = parseFloat(req.body.stock);
+
+        if (req.body.position != "") {
+            req.body.position = parseInt(req.body.position);
+        } else {
+            const countProducts = await Product.countDocuments();
+            req.body.position = countProducts + 1;
+        }
+
+        req.body.description = await processDescription(req.body.description);
+
+        req.body.createdBy = {
+            accountId: res.locals.user._id,
+            createdAt: new Date()
+        }
+
+        const product = new Product(req.body);
+        await product.save();
+
+        req.flash('success', 'Create product successfully!');
+
+        res.redirect(`${systemConfig.prefixAdmin}/products`);
+    } catch (error) {
+        console.error("Error in create product:", error);
+        req.flash('error', 'An error occurred while creating the product.');
+        res.redirect(`${systemConfig.prefixAdmin}/products`);
+    }
+}
+
+// [GET] admin/products/edit/:id
+module.exports.edit = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        const find = {
+            _id: id,
+            deleted: false,
+        };
+
+        const product = await Product.findOne(find);
+
+        if (!product) {
+            req.flash('error', 'Product not found!');
+            return res.redirect(`${systemConfig.prefixAdmin}/products`);
+        }
+
+
+        const records = await ProductCategory.find({
+            deleted: false,
+        });
+
+        const newCategory = createTreeHelper.createTree(records);
+
+
+        res.render("admin/pages/products/edit.pug", {
+            pageTitle: "Edit Product",
+            product: product,
+            category: newCategory,
+        });
+    }
+    catch (error) {
+        console.error("Error in edit product:", error);
+        req.flash('error', 'An error occurred while editing the product.');
+        res.redirect(`${systemConfig.prefixAdmin}/products`);
+    }
+}
+
+// [PATCH] admin/products/edit/:id
+module.exports.editPatch = async (req, res) => {
+    try {
+        req.body.price = parseFloat(req.body.price);
+        req.body.discountPercentage = parseFloat(req.body.discountPercentage);
+        req.body.stock = parseFloat(req.body.stock);
+        req.body.position = parseInt(req.body.position);
+
+        const existingProduct = await Product.findById(req.params.id);
+
+        if (!existingProduct) {
+            req.flash('error', 'Product not found.');
+            return res.redirect(`${systemConfig.prefixAdmin}/products`);
+        }
+
+        // Xử lý ảnh trong description
+        try {
+            req.body.description = await processDescription(req.body.description);
+        } catch (err) {
+            console.error('[CLOUDINARY UPLOAD ERROR]', err);
+            req.flash('error', 'Lỗi upload ảnh trong mô tả.');
+            return res.redirect(`${systemConfig.prefixAdmin}/products`);
+        }
+
+        // Tạo bản sao dữ liệu cần update, không ghi đè updatedBy
+        const updateData = { ...req.body };
+        delete updateData.updatedBy; // chắc chắn không ghi đè updatedBy
+
+        await Product.findByIdAndUpdate(req.params.id, {
+            ...updateData,
             $push: {
                 updatedBy: {
                     accountId: res.locals.user._id,
@@ -514,155 +375,42 @@ const toggleFeature = async (req, res, next) => {
             }
         });
 
-        return ResponseFormatter.success(
-            res,
-            {
-                _id: id,
-                feature: newFeatureStatus,
-                isFeatured: newFeatureStatus === '1'
-            },
-            `Product ${newFeatureStatus === '1' ? 'featured' : 'unfeatured'} successfully`
-        );
-
+        req.flash('success', 'Update product successfully!');
+        res.redirect(`${systemConfig.prefixAdmin}/products`);
     } catch (error) {
-        console.error('❌ Toggle feature error:', error);
-        if (error instanceof ApiError) {
-            return next(error);
-        }
-        next(new ApiError(500, 'Failed to toggle featured status'));
+        console.error("Error in edit patch:", error);
+        req.flash('error', 'An error occurred while updating the product.');
+        res.redirect(`${systemConfig.prefixAdmin}/products`);
     }
 };
 
-/**
- * @desc    Soft delete product
- * @route   DELETE /api/v1/admin/products/:id
- * @access  Private (products_delete)
- */
-const deleteProduct = async (req, res, next) => {
-    try {
-        const { id } = req.params;
 
-        const product = await Product.findByIdAndUpdate(
-            id,
-            {
-                deleted: true,
-                deletedBy: {
-                    accountId: res.locals.user._id,
-                    deletedAt: new Date()
-                }
-            },
-            { new: true }
-        ).select('_id title');
+// [GET] admin/products/detail/:id
+module.exports.detail = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        const find = {
+            _id: id,
+            deleted: false,
+            status: "active"
+        };
+
+        const product = await Product.findOne(find);
 
         if (!product) {
-            throw new ApiError(404, 'Product not found');
+            req.flash('error', 'Product not found!');
+            return res.redirect(`${systemConfig.prefixAdmin}/products`);
         }
 
-        return ResponseFormatter.success(
-            res,
-            {
-                _id: product._id,
-                title: product.title
-            },
-            'Product deleted successfully'
-        );
-
-    } catch (error) {
-        console.error('❌ Delete product error:', error);
-        if (error instanceof ApiError) {
-            return next(error);
-        }
-        next(new ApiError(500, 'Failed to delete product'));
+        res.render("admin/pages/products/detail.pug", {
+            pageTitle: product.title,
+            product: product,
+        });
     }
-};
-
-/**
- * @desc    Restore deleted product
- * @route   PATCH /api/v1/admin/products/:id/restore
- * @access  Private (products_edit)
- */
-const restoreProduct = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-
-        const product = await Product.findByIdAndUpdate(
-            id,
-            {
-                deleted: false,
-                $unset: { deletedBy: "" },
-                $push: {
-                    updatedBy: {
-                        accountId: res.locals.user._id,
-                        updatedAt: new Date()
-                    }
-                }
-            },
-            { new: true }
-        ).select('_id title status');
-
-        if (!product) {
-            throw new ApiError(404, 'Product not found');
-        }
-
-        return ResponseFormatter.success(
-            res,
-            product,
-            'Product restored successfully'
-        );
-
-    } catch (error) {
-        console.error('❌ Restore product error:', error);
-        if (error instanceof ApiError) {
-            return next(error);
-        }
-        next(new ApiError(500, 'Failed to restore product'));
+    catch (error) {
+        console.error("Error in product detail:", error);
+        req.flash('error', 'An error occurred while loading product detail.');
+        res.redirect(`${systemConfig.prefixAdmin}/products`);
     }
-};
-
-/**
- * @desc    Permanently delete product
- * @route   DELETE /api/v1/admin/products/:id/permanent
- * @access  Private (products_delete + super admin)
- */
-const permanentDeleteProduct = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-
-        const product = await Product.findByIdAndDelete(id);
-
-        if (!product) {
-            throw new ApiError(404, 'Product not found');
-        }
-
-        return ResponseFormatter.success(
-            res,
-            {
-                _id: id,
-                title: product.title
-            },
-            'Product permanently deleted'
-        );
-
-    } catch (error) {
-        console.error('❌ Permanent delete error:', error);
-        if (error instanceof ApiError) {
-            return next(error);
-        }
-        next(new ApiError(500, 'Failed to permanently delete product'));
-    }
-};
-
-module.exports = {
-    getAllProducts,
-    getProductById,
-    createProduct,
-    patchProduct,
-    updateProduct: patchProduct, // Alias for PUT
-    changeStatus,
-    bulkAction,
-    changePosition,
-    toggleFeature,
-    deleteProduct,
-    restoreProduct,
-    permanentDeleteProduct
-};
+}

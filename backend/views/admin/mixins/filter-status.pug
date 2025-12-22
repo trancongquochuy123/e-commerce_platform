@@ -1,8 +1,9 @@
+//- Mixin Lọc trạng thái: Giữ nguyên logic, chỉnh lại class
 mixin filter-status(filterStatus)
-    div.btn-group(role="group" aria-label="Filter status buttons")
+    .btn-group(role="group")
         each item in filterStatus
             button(
                 type="button" 
-            class=`btn btn-outline-primary ${item.class}` 
-            button-status=item.status) #{item.name}
-
+                class=`btn btn-outline-primary ${item.class}` 
+                button-status=item.status
+            ) #{item.name}
