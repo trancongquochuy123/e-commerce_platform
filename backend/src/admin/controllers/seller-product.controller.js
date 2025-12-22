@@ -142,10 +142,7 @@ const createProduct = async (req, res) => {
       createdAt: new Date(),
     };
 
-    // Handle thumbnail from multer + cloudinary middleware
-    if (req.file && req.file.path) {
-      req.body.thumbnail = req.file.path;
-    }
+    // The thumbnail and images are already in req.body by the uploadCloudinary middleware
 
     // Create product
     const product = new Product(req.body);

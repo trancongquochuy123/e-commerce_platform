@@ -49,8 +49,11 @@ router.get("/create", sellerProductController.renderCreate);
  */
 router.post(
   "/create",
-  upload.single("thumbnail"),
-  uploadCloudinary("products/thumbnails"),
+  upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "images", maxCount: 10 },
+  ]),
+  uploadCloudinary(),
   sellerProductController.createProduct
 );
 

@@ -504,6 +504,27 @@ module.exports.resetPasswordPost = async (req, res, next) => {
 };
 
 // [GET] /info
+module.exports.getShop = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const account = await Account.findById(id);
+
+    return ResponseFormatter.success(
+      res,
+      {
+        shop: {
+          ...account.toObject(),
+        },
+      },
+      "Lấy thông tin cửa hàng thành công."
+    );
+  } catch (err) {
+    console.error("❌ Error getting user info:", err);
+    next(new ApiError(500, "Lỗi hệ thống khi lấy thông tin cừa hàng."));
+  }
+};
+
 module.exports.info = async (req, res, next) => {
   try {
     // Giả định req.user được gán từ middleware xác thực tokenUser
@@ -637,7 +658,7 @@ module.exports.becomeSeller = async (req, res, next) => {
 
     // Validate and create the account
     const newAccount = new Account({
-      fullName: user.fullName,
+      fullName: req.user.shopName,
       email: user.email,
       password: user.password,
       roleId: shopRoleId,
