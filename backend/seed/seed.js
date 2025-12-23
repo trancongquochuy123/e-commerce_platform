@@ -500,7 +500,7 @@ const seedProducts = async (categories, accounts, shopAccount, count = 200) => {
 
   for (let i = 0; i < count; i++) {
     const title = faker.commerce.productName();
-    const price = faker.number.float({ min: 1, max: 10000 }).toFixed(2);
+    const price = faker.number.float({ min: 1, max: 9999 }).toFixed(2);
     const discount = faker.number.int({ min: 0, max: 80 });
     const category = categories[Math.floor(Math.random() * categories.length)];
     const createdByAccount =

@@ -35,6 +35,7 @@ block main
                   option(value="active" selected=(user.status === 'active')) Hoạt động
                   option(value="inactive" selected=(user.status !== 'active')) Không hoạt động
 
+          
               .mb-3 
                 label.form-label(for="password") Mật khẩu (Để trống nếu không muốn thay đổi)
                 input.form-control#password(type="password" name="password" placeholder="Nhập mật khẩu mới nếu bạn muốn thay đổi")
