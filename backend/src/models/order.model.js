@@ -8,6 +8,11 @@ const orderSchema = new mongoose.Schema(
       ref: "Cart",
       required: true,
     },
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     userInfo: {
       fullName: { type: String, required: true },
       phone: { type: String, required: true },

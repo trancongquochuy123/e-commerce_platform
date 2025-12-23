@@ -129,6 +129,173 @@ module.exports.index = async (req, res, next) => {
   }
 };
 
+module.exports.getOrder = async (req, res, next) => {
+  try {
+    const userId = req.user ? req.user._id : req.user.id; // Lấy userId từ req.user nếu đã đăng nhập
+
+    if (!userId) {
+      return next(new ApiError(401, "Please log in to view your orders."));
+    }
+
+    const {
+      page = 1,
+      limit = 10,
+    } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const filter = { user_id: userId, status: { $nin: ["delivered", "cancelled"] } }
+
+    const orders = await Order.find(filter)
+      .sort({ createdAt: -1 }) // Sắp xếp đơn hàng mới nhất lên đầu
+      .populate("products.product_id", "title thumbnail slug") // Lấy thông tin sản phẩm
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+
+    if (!orders || orders.length === 0) {
+      return ResponseFormatter.success(res, { orders: [] }, "No orders found for this user.");
+    }
+
+    const formattedOrders = orders.map(order => {
+      let totalOrderPrice = 0;
+      const products = order.products.map(item => {
+        const productInfo = item.product_id;
+        const finalPrice = item.price * (1 - (item.discountPercentage || 0) / 100);
+        const itemTotalPrice = finalPrice * item.quantity;
+        totalOrderPrice += itemTotalPrice;
+
+        return {
+          productId: productInfo ? productInfo._id : null,
+          title: productInfo ? productInfo.title : "Unknown Product",
+          thumbnail: productInfo ? productInfo.thumbnail : null,
+          slug: productInfo ? productInfo.slug : null,
+          price: item.price,
+          discountPercentage: item.discountPercentage,
+          finalPrice: parseFloat(finalPrice.toFixed(2)),
+          quantity: item.quantity,
+          itemTotalPrice: parseFloat(itemTotalPrice.toFixed(2)),
+        };
+      });
+
+      return {
+        _id: order._id,
+        userInfo: order.userInfo,
+        products: products,
+        method: order.method,
+        status: order.status,
+        isPaid: order.isPaid,
+        paidAt: order.paidAt,
+        createdAt: order.createdAt,
+        totalOrderPrice: parseFloat(totalOrderPrice.toFixed(2)),
+      };
+    });
+
+    const totalOrders = await Order.countDocuments(filter);
+
+    // Pagination metadata
+    const pagination = {
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalOrders / parseInt(limit)),
+      totalItems: totalOrders,
+      limit: parseInt(limit),
+    };
+
+    return ResponseFormatter.success(
+      res,
+      {
+        orders: formattedOrders,
+        pagination
+      },
+      "Orders retrieved successfully."
+    );
+  } catch (err) {
+    console.error("❌ Error retrive orders:", err);
+    next(new ApiError(500, "Failed to retrive orders."));
+  }
+}
+
+module.exports.getBought = async (req, res, next) => {
+  try {
+    const userId = req.user ? req.user._id : null; // Lấy userId từ req.user nếu đã đăng nhập
+
+    if (!userId) {
+      return next(new ApiError(401, "Please log in to view your orders."));
+    }
+
+    const {
+      page = 1,
+      limit = 10,
+    } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const filter = { user_id: userId, status: "delivered" }
+
+    const orders = await Order.find(filter)
+      .sort({ createdAt: -1 }) // Sắp xếp đơn hàng mới nhất lên đầu
+      .populate("products.product_id", "title thumbnail slug") // Lấy thông tin sản phẩm
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    if (!orders || orders.length === 0) {
+      return ResponseFormatter.success(res, { orders: [] }, "No orders found for this user.");
+    }
+
+    const formattedOrders = orders.map(order => {
+      let totalOrderPrice = 0;
+      const products = order.products.map(item => {
+        const productInfo = item.product_id;
+        const finalPrice = item.price * (1 - (item.discountPercentage || 0) / 100);
+        const itemTotalPrice = finalPrice * item.quantity;
+        totalOrderPrice += itemTotalPrice;
+
+        return {
+          productId: productInfo ? productInfo._id : null,
+          title: productInfo ? productInfo.title : "Unknown Product",
+          thumbnail: productInfo ? productInfo.thumbnail : null,
+          slug: productInfo ? productInfo.slug : null,
+          price: item.price,
+          discountPercentage: item.discountPercentage,
+          finalPrice: parseFloat(finalPrice.toFixed(2)),
+          quantity: item.quantity,
+          itemTotalPrice: parseFloat(itemTotalPrice.toFixed(2)),
+        };
+      });
+
+      return {
+        _id: order._id,
+        userInfo: order.userInfo,
+        products: products,
+        method: order.method,
+        status: order.status,
+        isPaid: order.isPaid,
+        paidAt: order.paidAt,
+        createdAt: order.createdAt,
+        totalOrderPrice: parseFloat(totalOrderPrice.toFixed(2)),
+      };
+    });
+
+    const totalOrders = await Order.countDocuments(filter);
+
+    // Pagination metadata
+    const pagination = {
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalOrders / parseInt(limit)),
+      totalItems: totalOrders,
+      limit: parseInt(limit),
+    };
+
+    return ResponseFormatter.success(
+      res,
+      { orders: formattedOrders, pagination },
+      "Products bought retrieved successfully."
+    );
+  } catch (err) {
+    console.error("❌ Error retrive products bought:", err);
+    next(new ApiError(500, "Failed to retrive products bought."));
+  }
+}
 // [POST] /checkout/order
 // Handles order creation with optional Stripe payment
 // If paymentMethod='stripe': creates PaymentIntent and requires clientSecret confirmation
@@ -256,6 +423,7 @@ module.exports.order = async (req, res, next) => {
     if (paymentMethod === "cod") {
       await decrementProductStock(productsForOrder);
       newOrder.paidAt = new Date();
+      newOrder.status = "delivered"
       await newOrder.save();
     }
 

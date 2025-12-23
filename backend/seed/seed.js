@@ -559,7 +559,7 @@ const seedProducts = async (categories, accounts, shopAccount, count = 200) => {
 };
 
 // Seed Carts
-const seedCarts = async (users, products, count = 5) => {
+const seedCarts = async (users, products, count = 8) => {
   console.log("🌱 Seeding Carts...");
   const carts = [];
   if (users.length === 0 || products.length === 0) return [];
@@ -592,10 +592,10 @@ const seedCarts = async (users, products, count = 5) => {
 };
 
 // Seed Orders
-const seedOrders = async (carts, products, users, count = 10) => {
+const seedOrders = async (carts, products, users, count = 50) => {
   console.log("🌱 Seeding Orders...");
   const orders = [];
-  const methods = ["cod", "online"];
+  const methods = ["cod", "stripe"];
   const statuses = [
     "pending",
     "processing",
@@ -603,49 +603,81 @@ const seedOrders = async (carts, products, users, count = 10) => {
     "delivered",
     "cancelled",
   ];
-  if (carts.length === 0) return [];
 
-  for (let i = 0; i < Math.min(count, carts.length); i++) {
-    const cart = carts[i];
+  if (users.length === 0 || products.length === 0) {
+    console.log("Skipping orders seeding because no users or products exist");
+    return [];
+  }
+
+  for (let i = 0; i < count; i++) {
+    // Pick a random user for the order
+    const user = users[Math.floor(Math.random() * users.length)];
+    const cart = carts.find((c) => c.user_id.equals(user._id));
+
     const orderProducts = [];
-    if (cart.products && cart.products.length > 0) {
-      cart.products.forEach((item) => {
-        const productDetail = products.find((p) =>
-          p._id.equals(item.product_id)
-        );
-        if (productDetail) {
-          orderProducts.push({
-            product_id: productDetail._id,
-            price: productDetail.price,
-            discountPercentage: productDetail.discountPercentage || 0,
-            quantity: item.quantity,
-          });
-        }
-      });
+    let cartForOrder = [];
+
+    // If user has a cart, use it. Otherwise, create a random cart.
+    if (cart && cart.products.length > 0) {
+      cartForOrder = cart.products;
     } else {
-      const product = products[Math.floor(Math.random() * products.length)];
-      orderProducts.push({
-        product_id: product._id,
-        price: product.price,
-        discountPercentage: 0,
-        quantity: 1,
-      });
+      const productCount = faker.number.int({ min: 1, max: 5 });
+      for (let j = 0; j < productCount; j++) {
+        const randomProduct =
+          products[Math.floor(Math.random() * products.length)];
+        cartForOrder.push({
+          product_id: randomProduct._id,
+          quantity: faker.number.int({ min: 1, max: 3 }),
+        });
+      }
     }
+
+    cartForOrder.forEach((item) => {
+      const productDetail = products.find((p) =>
+        p._id.equals(item.product_id)
+      );
+      if (productDetail) {
+        orderProducts.push({
+          product_id: productDetail._id,
+          price: productDetail.price,
+          discountPercentage: productDetail.discountPercentage || 0,
+          quantity: item.quantity,
+        });
+      }
+    });
+
+    if (orderProducts.length === 0) continue;
+
+    // Distribute statuses
+    const status = statuses[i % statuses.length];
+    const method = methods[i % methods.length];
+
+    // For "delivered" status, set isPaid to true and paidAt to a past date
+    const isPaid = status === "delivered";
+    const paidAt = isPaid ? faker.date.past() : null;
+
     orders.push({
-      cart_id: cart._id,
+      cart_id: cart ? cart._id : new mongoose.Types.ObjectId(), // Create a new ObjectId if no cart
+      user_id: user._id && user.id,
       userInfo: {
-        fullName: faker.person.fullName(),
-        phone: faker.phone.number(),
+        fullName: user.fullName,
+        phone: user.phone,
         address: faker.location.streetAddress(),
         note: faker.lorem.sentence(),
       },
       products: orderProducts,
-      method: faker.helpers.arrayElement(methods),
-      status: faker.helpers.arrayElement(statuses),
+      method: method,
+      status: status,
+      isPaid: isPaid,
+      paidAt: paidAt,
+      // Associate order with a user, though the model doesn't have a direct user_id link on Order
+      // This is more for logical connection during seeding. The cart_id links it.
     });
   }
 
   try {
+    // It's possible we are creating orders for carts that don't exist, which is fine for dummy data.
+    // The cart_id is just a reference.
     const createdOrders = await Order.insertMany(orders);
     console.log(`✓ Created ${createdOrders.length} orders`);
     return createdOrders;
@@ -734,7 +766,7 @@ const seedDatabase = async () => {
     const shopAccount = await seedShopAccount(roles);
 
     // 3. Seed other Users and Accounts
-    const users = await seedUsers(10);
+    const users = await seedUsers(1);
     const accounts = [
       rootAccount,
       shopAccount,
@@ -746,10 +778,10 @@ const seedDatabase = async () => {
       categories,
       accounts,
       shopAccount,
-      10000
+      1000
     );
     const carts = await seedCarts(users, products, 5);
-    // await seedOrders(carts, products, users, 10);
+    await seedOrders(carts, products, users, 50);
     await seedForgotPasswords(3);
     await seedSettingsGeneral();
     console.log("\n✨ Database seeding completed successfully!\n");
