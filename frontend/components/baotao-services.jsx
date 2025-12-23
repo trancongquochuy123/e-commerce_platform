@@ -20,7 +20,6 @@ export default async function BaotaoService() {
       });
       if (res.ok) {
         const data = await res.json();
-        console.log(data);
         user = data.data.user;
       }
     }
@@ -49,30 +48,9 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E7%94%B5%E8%84%91"
+                    href="/categories/laptops"
                   >
-                    Computers
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E7%94%B5%E8%84%91%E9%85%8D%E4%BB%B6"
-                  >
-                    Accessories
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%8A%9E%E5%85%AC"
-                  >
-                    Office
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E6%96%87%E5%85%B7"
-                  >
-                    Stationery
+                    Laptops
                   </a>
                 </div>
               </li>
@@ -81,62 +59,9 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%AE%B6%E7%94%B5"
-                  >
-                    Appliances
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E6%89%8B%E6%9C%BA"
+                    href="/categories/phones"
                   >
                     Phones
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E8%BF%90%E8%90%A5%E5%95%86"
-                  >
-                    Telecom
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E6%95%B0%E7%A0%81"
-                  >
-                    Electronics
-                  </a>
-                </div>
-              </li>
-              <li className="J_Cat cate--EZsNFK5T">
-                <div className="first-cate-container--odleAL9p">
-                  <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?page=1&q=%E5%B7%A5%E4%B8%9A%E9%9B%B6%E4%BB%B6%E8%80%97%E6%9D%90&tab=all"
-                  >
-                    Industrial
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?page=1&q=%E5%95%86%E4%B8%9A%E5%8A%9E%E5%85%AC&tab=all"
-                  >
-                    Business
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?page=1&q=%E5%86%9C%E4%B8%9A%E7%89%A9%E8%B5%84&tab=all"
-                  >
-                    Agriculture
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?page=1&q=%E4%B8%AA%E6%80%A7%E5%AE%9A%E5%88%B6%E5%A5%BD%E7%89%A9&tab=all"
-                  >
-                    Custom
                   </a>
                 </div>
               </li>
@@ -145,28 +70,14 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%AE%B6%E5%85%B7"
+                    href="/categories/furniture"
                   >
                     Furniture
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%AE%B6%E8%A3%85"
-                  >
-                    Decor
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?page=1&q=%E5%AE%B6%E5%B1%85&tab=all"
-                  >
-                    Home
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%8E%A8%E5%85%B7"
+                    href="/categories/kitchen"
                   >
                     Kitchen
                   </a>
@@ -177,28 +88,21 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%A5%B3%E8%A3%85"
+                    href="/categories/women-s-wear"
                   >
                     Women&apos;s Wear
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?page=1&q=%E7%94%B7%E8%A3%85&tab=all"
+                    href="/categories/men-s-wear"
                   >
                     Men&apos;s Wear
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%86%85%E8%A1%A3"
-                  >
-                    Underwear
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E9%85%8D%E9%A5%B0"
+                    href="/categories/accessories"
                   >
                     Accessories
                   </a>
@@ -209,28 +113,28 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%A5%B3%E9%9E%8B"
+                    href="/categories/women-s-shoes"
                   >
                     Women&apos;s Shoes
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E7%94%B7%E9%9E%8B"
+                    href="/categories/men-s-shoes"
                   >
                     Men&apos;s Shoes
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E8%BF%90%E5%8A%A8%E8%A3%85%E5%A4%87"
+                    href="/categories/sports"
                   >
                     Sports
                   </a>
                   <span className="service-slash--BcpvY80i tb-ifont"></span>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E6%88%B7%E5%A4%96%E7%94%A8%E5%93%81"
+                    href="/categories/outdoor"
                   >
                     Outdoor
                   </a>
@@ -241,94 +145,9 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?page=1&q=%E6%B1%BD%E8%BD%A6&tab=all"
+                    href="/categories/automotive"
                   >
                     Automotive
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E7%8F%A0%E5%AE%9D"
-                  >
-                    Jewelry
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E6%96%87%E7%8E%A9"
-                  >
-                    Collectibles
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E7%AE%B1%E5%8C%85"
-                  >
-                    Bags
-                  </a>
-                </div>
-              </li>
-              <li className="J_Cat cate--EZsNFK5T">
-                <div className="first-cate-container--odleAL9p">
-                  <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E9%A3%9F%E5%93%81"
-                  >
-                    Food
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E7%94%9F%E9%B2%9C"
-                  >
-                    Fresh
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E9%85%92%E7%B1%BB"
-                  >
-                    Beverages
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://www.liangxinyao.com/"
-                  >
-                    Health
-                  </a>
-                </div>
-              </li>
-              <li className="J_Cat cate--EZsNFK5T">
-                <div className="first-cate-container--odleAL9p">
-                  <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E6%AF%8D%E5%A9%B4"
-                  >
-                    Baby & Mom
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E7%AB%A5%E8%A3%85"
-                  >
-                    Kids Wear
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E7%8E%A9%E5%85%B7"
-                  >
-                    Toys
-                  </a>
-                  <span className="service-slash--BcpvY80i tb-ifont"></span>
-                  <a
-                    className="cate-content-href--HI8wwRts"
-                    href="https://s.taobao.com/search?q=%E5%AE%A0%E7%89%A9"
-                  >
-                    Pets
                   </a>
                 </div>
               </li>
@@ -447,9 +266,18 @@ export default async function BaotaoService() {
                   )}
 
                   <span className="divider" />
-                  <a href="/store-setup" className="btn-open">
-                    Store setup
-                  </a>
+                  {user && user.isSeller ? (
+                    <a
+                      href="http://localhost:3001/admin/dashboard"
+                      className="btn-open"
+                    >
+                      Store
+                    </a>
+                  ) : (
+                    <a href="/store-setup" className="btn-open">
+                      Store setup
+                    </a>
+                  )}
                 </div>
               </div>
               {user ? (
@@ -489,28 +317,19 @@ export default async function BaotaoService() {
                 </a>
               </div>
               <div className="mytao-content">
-                <a
-                  href="https://favorite.taobao.com/list_bought_shops_n.htm"
-                  className="mytao-collectitem"
-                >
+                <a href="/orders/bought" className="mytao-collectitem">
                   <span className="tb-ifont mytao-icon"></span>
                   <p>Bought</p>
                 </a>
               </div>
               <div className="mytao-content">
-                <a
-                  href="https://i.taobao.com/my_itaobao/subscription"
-                  className="mytao-collectitem"
-                >
+                <a href="#" className="mytao-collectitem">
                   <span className="tb-ifont mytao-icon"></span>
                   <p>Followings</p>
                 </a>
               </div>
               <div className="mytao-content">
-                <a
-                  href="https://i.taobao.com/my_itaobao/itao-tool/footMark"
-                  className="mytao-collectitem"
-                >
+                <a href="/orders" className="mytao-collectitem">
                   <span className="tb-ifont mytao-icon"></span>
                   <p>Orders</p>
                 </a>

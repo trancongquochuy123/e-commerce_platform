@@ -43,7 +43,7 @@ const getCart = async (req, res, next) => {
                     discount: 0,
                     total: 0
                 }
-            }, 'Cart not found');
+            }, 'Please login to add product to cart');
         }
 
         // Filter out invalid products and calculate prices
@@ -133,7 +133,7 @@ const addToCart = async (req, res, next) => {
         // Get or create cart
         let cart = await Cart.findById(cartId);
         if (!cart) {
-            throw new ApiError(404, 'Cart not found');
+            throw new ApiError(404, "Please login to add product to cart");
         }
 
         // Check if product already in cart

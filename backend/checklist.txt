@@ -1,5 +1,15 @@
+Sửa tính năng đổi trạng thái active và inactive với toán tử !
+
 /admin/accounts
 [] Khi sửa đổi tài khoản thì phải chọn luôn role hiện có và giữ lại avatar nếu không upload avatar mới
 [] Sửa filter
 [] Sửa tìm kiếm
 [] Thêm chức năng xoá tài khoản
+
+
+/admin/seller-product
+[] upload nhiều ảnh hơn và đưa riêng ra trường image
+[] Thêm phần specialize
+
+
+[] Hiển thị shop trong page details

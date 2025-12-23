@@ -197,7 +197,7 @@ const getProductsByCategory = async (req, res, next) => {
         const { slugCategory } = req.params;
         const {
             page = 1,
-            limit = 20,
+            limit = 24,
             sort = "createdAt",
             order = "desc",
         } = req.query;
@@ -246,7 +246,12 @@ const getProductsByCategory = async (req, res, next) => {
         ]);
 
         // Calculate discounted prices
-        const productsWithPrices = priceNewProduct(products);
+        const productsWithPrices = [];
+
+        products.forEach(product => {
+            product.priceNew = priceNewProduct(product);
+            productsWithPrices.push(product);
+        })
 
         // Pagination metadata
         const pagination = {

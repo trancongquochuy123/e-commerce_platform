@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
-export default function OrderSummary({ onCheckout }) {
+export default function OrderSummary({ onCheckout, isSubmitting = false }) {
   const [items, setItems] = useState([]);
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
@@ -190,8 +190,9 @@ export default function OrderSummary({ onCheckout }) {
           className="bg-accent text-accent-foreground hover:bg-accent/90 w-full"
           size="lg"
           onClick={onCheckout}
+          disabled={isSubmitting}
         >
-          {"Complete Purchase"}
+          {isSubmitting ? "Processing..." : "Complete Purchase"}
         </Button>
       </CardFooter>
     </Card>

@@ -1,6 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import { Search, X } from "lucide-react";
 
 const Logo = () => (
   <Link href={"/"}>
@@ -10,15 +15,64 @@ const Logo = () => (
   </Link>
 );
 
-const SearchBar = () => (
-  <div className="flex w-full max-w-[600px] flex-1 gap-2 rounded-xl border-2 border-[#ff5000] p-[0.15rem] md:order-0 md:w-auto lg:max-w-[800px]">
-    <Input
-      type="text"
-      placeholder="Search for products..."
-      className="flex-1 rounded border-none bg-transparent px-3 py-2 text-sm text-gray-800 outline-none placeholder:text-gray-400 md:px-4 md:py-3 md:text-base"
-    />
-  </div>
-);
+const SearchBar = () => {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  const [isPending, startTransition] = useTransition();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const keyword = query.trim();
+    if (!keyword) return;
+
+    startTransition(() => {
+      router.push(`/search?keyword=${encodeURIComponent(keyword)}`);
+    });
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      role="search"
+      aria-busy={isPending}
+      className="flex min-h-11 w-full max-w-[600px] flex-1 items-center gap-3 rounded-xl border-2 border-[#ff5000] px-2 py-1.5 transition focus-within:ring-2 focus-within:ring-orange-400 md:w-auto lg:max-w-[800px]"
+      style={{ paddingRight: 10, paddingLeft: 10 }}
+    >
+      <Input
+        id="search-input"
+        type="search"
+        placeholder="Search for products..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        disabled={isPending}
+        className="flex-1 border-none bg-transparent px-3 py-2 text-sm text-gray-800 outline-none md:px-4 md:py-3 md:text-base"
+      />
+
+      {/* Clear button */}
+      {/* {query && !isPending && (
+        <button
+          type="button"
+          onClick={() => setQuery("")}
+          aria-label="Clear search"
+          className="rounded px-2 py-2 text-gray-400 hover:text-gray-600"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )} */}
+
+      {/* Submit button */}
+      <button
+        type="submit"
+        disabled={!query.trim() || isPending}
+        aria-label="Search"
+        className="rounded-lg px-4 py-3 text-[#ff5000] transition-colors hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <Search className="h-5 w-5" />
+      </button>
+    </form>
+  );
+};
 
 const CartIcon = () => (
   <a href="/cart">

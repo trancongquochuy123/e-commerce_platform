@@ -1,9 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const controller = require('../controllers/checkout.controller.js');
-const userMiddleware = require('../middlewares/user.middleware.js');
+const controller = require("../controllers/checkout.controller.js");
+const userMiddleware = require("../middlewares/user.middleware.js");
+const cartMiddleware = require("../middlewares/cart.middleware.js");
 
+router.get("/", controller.index);
 /**
  * @swagger
  * /api/v1/checkout:
@@ -17,6 +19,12 @@ const userMiddleware = require('../middlewares/user.middleware.js');
  */
 router.get('/', controller.index);
 
+router.get("/order", userMiddleware.infoUser, controller.getOrder);
+router.get("/boughts", userMiddleware.infoUser, controller.getBought);
+router.post("/order", userMiddleware.infoUser, controller.order);
+
+// Stripe payment confirmation endpoint
+router.post("/confirm-payment", controller.confirmPayment);
 /**
  * @swagger
  * /api/v1/checkout/order:
@@ -41,6 +49,7 @@ router.get('/', controller.index);
  */
 router.post('/order',userMiddleware.infoUser, controller.order);
 
+router.get("/success/:orderId", controller.success);
 /**
  * @swagger
  * /api/v1/checkout/success/{orderId}:

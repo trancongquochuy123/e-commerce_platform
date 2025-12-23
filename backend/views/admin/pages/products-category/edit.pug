@@ -3,7 +3,7 @@ include ../../mixins/alert.pug
 include ../../mixins/select-tree.pug
 
 block main
-    if role.permissions.includes('products_category_edit')
+    if role.permissions.includes('categories_edit')
         h1 Edit Product
         +alert-error(5000)
 

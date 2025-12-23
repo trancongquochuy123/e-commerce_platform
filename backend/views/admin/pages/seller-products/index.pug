@@ -1,0 +1,109 @@
+extends ../../layout/default.pug
+include ../../mixins/filter-status.pug
+include ../../mixins/search.pug
+include ../../mixins/pagination.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-success(5000)
+
+    .card.dashboard-card
+        .card-header.d-flex.align-items-center.justify-content-between
+            .left
+                h5.mb-0 My Products
+                small.text-muted Manage your products as a seller
+            .right
+                a(
+                    href=`/${prefixAdmin}/seller/products/create`
+                    class="btn btn-primary"
+                )
+                    i.bi.bi-plus-lg.mr-1
+                    | Create New
+        .card-body
+            //- Search and filters
+            .d-flex.flex-wrap.align-items-center.mb-3
+                .flex-grow-1
+                    +search(keyword)
+                .ml-3
+                    h6.mb-2 Filter by Status
+                    .d-flex.align-items-center.gap-3
+                        +filter-status(filterStatus)
+
+            //- Table
+            table(class="table table-striped product-table")
+                thead
+                    tr
+                        th #
+                        th Image
+                        th Title
+                        th Price
+                        th Stock
+                        th Category
+                        th Status
+                        th Actions
+                tbody
+                    each product, index in products
+                        tr  
+                            - const currentPage = Number(pagination.currentPage);
+                            - const limitItem = Number(pagination.limitItem);
+                            td #{index + 1 + (currentPage - 1) * limitItem}
+                            td
+                                img(src=product.thumbnail, alt=product.title, class="product-image" style="width: 60px; height: 60px; object-fit: cover;")
+                            td 
+                                strong #{product.title}
+                            td 
+                                if product.discountPercentage > 0
+                                    span.text-decoration-line-through.text-muted $#{product.price}
+                                    br
+                                    span.text-danger $#{product.priceNew}
+                                else
+                                    span $#{product.price}
+                            td #{product.stock}
+                            td 
+                                if product.product_category_id && product.product_category_id.title
+                                    = product.product_category_id.title
+                                else if product.category
+                                    = product.category
+                                else
+                                    | N/A
+
+                            td
+                                if (product.status == 'active')
+                                    a(
+                                        href="javascript:;"
+                                        data-status=product.status
+                                        data-id=product._id
+                                        button-change-status
+                                        class="badge bg-success"
+                                        ) Active
+                                else
+                                    a(
+                                        href="javascript:;"
+                                        data-status=product.status 
+                                        data-id=product._id
+                                        button-change-status
+                                        class="badge bg-secondary"
+                                        ) Inactive
+                            td
+                                .btn-group
+                                    a.btn.btn-sm.btn-outline-info.btn-icon(
+                                        href=`/${prefixAdmin}/seller/products/detail/${product._id}`
+                                        title='Detail'
+                                    )
+                                        i.bi.bi-eye
+                                    a.btn.btn-sm.btn-outline-warning.btn-icon(
+                                        href=`/${prefixAdmin}/seller/products/edit/${product._id}`
+                                        title='Edit'
+                                    )
+                                        i.bi.bi-pencil-square
+                                    button.btn.btn-sm.btn-outline-danger.btn-icon(
+                                        button-delete
+                                        data-id=product._id
+                                        type="button"
+                                        title='Delete'
+                                    )
+                                        i.bi.bi-trash
+
+    +pagination(pagination)
+
+    script(src="/admin/js/product.js")

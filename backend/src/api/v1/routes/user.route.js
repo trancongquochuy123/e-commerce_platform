@@ -211,6 +211,7 @@ router.get('/logout', userMiddleware.requireAuth, controller.logout);
 router.get('/info', userMiddleware.requireAuth, controller.info);
 router.post('/info', userMiddleware.requireAuth, controller.infoPost);
 
+router.get("/shop/:id", controller.getShop);
 // Become seller route (requires authentication)
 /**
  * @swagger

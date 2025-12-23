@@ -44,6 +44,11 @@ const productSchema = new mongoose.Schema(
         feature: { type: String, enum: ['1', '0'], default: '0' },
         position: { type: Number },
         slug: { type: String, slug: "title", unique: true },
+        accountId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Account',
+            required: true
+        },
         createdBy: {
             accountId: { type: mongoose.Schema.Types.ObjectId },
             createdAt: { type: Date, default: Date.now }

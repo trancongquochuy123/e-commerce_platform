@@ -8,6 +8,8 @@ const sendMailHelper = require("../../../utils/sendMail.js");
 // Bạn nên đảm bảo các module này tồn tại trong ứng dụng của mình.
 const ApiError = require("../../../utils/apiError.js");
 const ResponseFormatter = require("../../../utils/response.js");
+const Role = require("../../../models/role.model.js");
+const Account = require("../../../models/account.model.js");
 
 // [GET] /register (Route này thường không cần thiết trong API, nhưng giữ lại để đồng bộ)
 // API Endpoint thường không cần GET cho trang đăng ký.
@@ -502,6 +504,27 @@ module.exports.resetPasswordPost = async (req, res, next) => {
 };
 
 // [GET] /info
+module.exports.getShop = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const account = await Account.findById(id);
+
+    return ResponseFormatter.success(
+      res,
+      {
+        shop: {
+          ...account.toObject(),
+        },
+      },
+      "Lấy thông tin cửa hàng thành công."
+    );
+  } catch (err) {
+    console.error("❌ Error getting user info:", err);
+    next(new ApiError(500, "Lỗi hệ thống khi lấy thông tin cừa hàng."));
+  }
+};
+
 module.exports.info = async (req, res, next) => {
   try {
     // Giả định req.user được gán từ middleware xác thực tokenUser
@@ -620,6 +643,28 @@ module.exports.becomeSeller = async (req, res, next) => {
       { _id: req.user._id, deleted: false },
       { $set: updateData }
     );
+
+    let findRoles = {
+      deleted: false,
+    };
+
+    const roles = await Role.find(findRoles);
+    const shopRoleId = roles.find((role) => role.title === "Shop")?._id;
+
+    const user = await User.findOne({
+      _id: req.user._id,
+      deleted: false,
+    }).select("-tokenUser -deleted -__v"); // isSeller and shopName are included by default
+
+    // Validate and create the account
+    const newAccount = new Account({
+      fullName: req.user.shopName,
+      email: user.email,
+      password: user.password,
+      roleId: shopRoleId,
+    });
+
+    await newAccount.save();
 
     return ResponseFormatter.success(
       res,

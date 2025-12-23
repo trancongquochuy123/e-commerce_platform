@@ -1,0 +1,139 @@
+extends ../../layout/default.pug
+include ../../mixins/alert.pug
+
+block main
+    +alert-success(5000)
+    
+    .container-fluid
+        .d-flex.justify-content-between.align-items-center.mb-4
+            h1.mb-0 Product Detail
+            .btn-group
+                a(href=`/${prefixAdmin}/seller/products/edit/${product._id}` class="btn btn-primary")
+                    i.fas.fa-edit
+                    | #{" "} Edit Product
+                a(href=`/${prefixAdmin}/seller/products` class="btn btn-secondary")
+                    i.fas.fa-arrow-left
+                    | #{" "} Back to My Products
+
+        .row
+            .col-md-5
+                .card
+                    .card-body.text-center
+                        if product.thumbnail
+                            img(src=product.thumbnail alt=product.title class="img-fluid rounded mb-3" style="max-height: 400px; object-fit: contain;")
+                        else
+                            .bg-light.d-flex.align-items-center.justify-content-center(style="height: 400px;")
+                                span.text-muted No Image Available
+                        
+                        if product.images && product.images.length > 0
+                            .image-gallery.mt-3
+                                strong Additional Images:
+                                .d-flex.flex-wrap.gap-2.mt-2.justify-content-center
+                                    each image in product.images
+                                        img(src=image alt="Product Image" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;")
+
+            .col-md-7
+                .card
+                    .card-header
+                        h3.mb-0 #{product.title}
+                    .card-body
+                        .row.mb-3
+                            .col-md-6
+                                p.mb-2
+                                    strong Category: 
+                                    if product.product_category_id
+                                        span.badge.bg-info #{product.product_category_id.title || 'N/A'}
+                                    else
+                                        span.text-muted None
+                                
+                                p.mb-2
+                                    strong Brand: 
+                                    | #{product.brand || 'N/A'}
+                                
+                                p.mb-2
+                                    strong SKU: 
+                                    | #{product.sku || 'N/A'}
+                            
+                            .col-md-6
+                                p.mb-2
+                                    strong Status: 
+                                    if product.status === 'active'
+                                        span.badge.bg-success Active
+                                    else
+                                        span.badge.bg-secondary Inactive
+                                
+                                p.mb-2
+                                    strong Stock: 
+                                    if product.stock > 0
+                                        span.badge.bg-primary #{product.stock} units
+                                    else
+                                        span.badge.bg-danger Out of Stock
+
+                                p.mb-2
+                                    strong Rating: 
+                                    | #{product.rating || 'N/A'} ⭐
+
+                        .row.mb-3
+                            .col-12
+                                h5 Pricing Information
+                                .card.bg-light
+                                    .card-body
+                                        .row
+                                            .col-6
+                                                p.mb-1
+                                                    strong Original Price: 
+                                                    span.fs-5 $#{product.price}
+                                            .col-6
+                                                p.mb-1
+                                                    strong Discount: 
+                                                    span.text-danger #{product.discountPercentage || 0}%
+                                        if product.priceNew && product.priceNew !== product.price
+                                            hr.my-2
+                                            .text-center
+                                                p.mb-0
+                                                    strong Final Price: 
+                                                    span.fs-4.text-success $#{product.priceNew}
+
+                        .row.mb-3
+                            .col-12
+                                h5 Description
+                                .card
+                                    .card-body
+                                        if product.description
+                                            div !{product.description}
+                                        else
+                                            p.text-muted No description available
+
+                        .row
+                            .col-12
+                                h5 Additional Information
+                                table.table.table-sm
+                                    tbody
+                                        if product.weight
+                                            tr
+                                                td
+                                                    strong Weight:
+                                                td #{product.weight} kg
+                                        if product.dimensions
+                                            tr
+                                                td
+                                                    strong Dimensions:
+                                                td #{product.dimensions.width} x #{product.dimensions.height} x #{product.dimensions.depth} cm
+                                        if product.warrantyInformation
+                                            tr
+                                                td
+                                                    strong Warranty:
+                                                td #{product.warrantyInformation}
+                                        if product.shippingInformation
+                                            tr
+                                                td
+                                                    strong Shipping:
+                                                td #{product.shippingInformation}
+                                        tr
+                                            td
+                                                strong Created:
+                                            td #{new Date(product.createdAt).toLocaleDateString()}
+                                        tr
+                                            td
+                                                strong Updated:
+                                            td #{new Date(product.updatedAt).toLocaleDateString()}

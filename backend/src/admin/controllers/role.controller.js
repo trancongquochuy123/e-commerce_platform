@@ -3,7 +3,7 @@ const Permission = require("../../models/permission.model");
 
 const systemConfig = require("../../../config/system");
 
-// [GET] admin/dashboard
+// [GET] admin/roles
 module.exports.index = async (req, res) => {
   let findRoles = {
     deleted: false,

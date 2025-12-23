@@ -25,6 +25,7 @@ router.use(userMiddleware.infoUser);
 
 // Sub routes
 router.use("/", require("./home.route"));
+router.use("/shop", require("./shop.route"));
 router.use("/products", require("./product.route"));
 router.use("/search", require("./search.route"));
 router.use("/cart", cartMiddleware.cartId, require("./cart.route"));

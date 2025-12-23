@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { API_URL } from "@/lib/constants";
 import ProductCard from "./product-card";
-import ProductGridSkeleton from "./product-grid-skeleton";
 
-export default function InfiniteProductGrid({ initialProducts }) {
+export default function InfiniteProductGrid({
+  initialProducts,
+  endpoint = `${API_URL}/products`,
+  initialHasMore = true,
+}) {
   const [products, setProducts] = useState(initialProducts);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(initialHasMore);
   const observerTarget = useRef(null);
 
   useEffect(() => {
@@ -30,15 +34,16 @@ export default function InfiniteProductGrid({ initialProducts }) {
         observer.unobserve(observerTarget.current);
       }
     };
-  }, [hasMore, loading, page]);
+  }, [endpoint, hasMore, loading, page]);
 
   const loadMoreProducts = async () => {
     setLoading(true);
     try {
       const nextPage = page + 1;
-      const res = await fetch(
-        `http://localhost:3001/api/v1/products?page=${nextPage}`,
-      );
+      const url = endpoint.includes("?")
+        ? `${endpoint}&page=${nextPage}`
+        : `${endpoint}?page=${nextPage}`;
+      const res = await fetch(url);
 
       if (!res.ok) {
         throw new Error("Failed to fetch products");

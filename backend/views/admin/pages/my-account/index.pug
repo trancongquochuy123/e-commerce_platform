@@ -23,7 +23,7 @@ block main
                                 span.text-muted Chưa cập nhật
 
                         dt.col-sm-4 Tên
-                        dd.col-sm-8 #{user.fullName || 'Chưa cập nhật'}
+                        dd.col-sm-8 Shop #{user.fullName || 'Chưa cập nhật'}
 
                         dt.col-sm-4 Email
                         dd.col-sm-8 #{user.email || 'Chưa cập nhật'}
@@ -40,6 +40,10 @@ block main
                                 span.badge.bg-success Hoạt động
                             else
                                 span.badge.bg-secondary Không hoạt động
+
+                        dt.col-sm-4 Thẻ Visa:
+                        //- dd.col-sm-8 #{role ? role.title : 'Không có quyền'}
+                        dd.col-sm-8 4242 4242 4242 4242
 
                     a.btn.btn-warning(href=`/${prefixAdmin}/my-account/edit`)
                         i.fa.fa-edit.me-2

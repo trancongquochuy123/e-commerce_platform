@@ -1,6 +1,7 @@
 import Header from "@/components/header";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import SellerInfo from "@/components/seller-info";
 import AddToCartButton from "@/components/add-to-cart-button";
 import { API_URL } from "@/lib/constants";
 import { SlashIcon } from "lucide-react";
@@ -86,17 +87,17 @@ export default async function ProductDetail({ params }) {
             </BreadcrumbSeparator>
             <BreadcrumbItem>
               <BreadcrumbLink
-                href="/components"
+                href={`/categories/${product.product_category_id.slug}`}
                 className="text-gray-500 hover:text-gray-700"
               >
-                Components
+                {product.product_category_id.title}
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator>
               <SlashIcon />
             </BreadcrumbSeparator>
             <BreadcrumbItem className="text-gray-900">
-              Incredible Rubber Gloves
+              {product.title}
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -125,8 +126,8 @@ export default async function ProductDetail({ params }) {
               )}
             </div>
 
-            {/* Rating */}
-            {product.averageRating && (
+            {/* Rating and Reviews */}
+            {product.averageRating ? (
               <div className="mt-4 flex items-center gap-2">
                 <div className="flex items-center">
                   {Array.from({ length: 5 }).map((_, i) => (
@@ -146,6 +147,10 @@ export default async function ProductDetail({ params }) {
                   {product.averageRating.toFixed(1)} ({product.totalReviews}{" "}
                   reviews)
                 </span>
+              </div>
+            ) : (
+              <div className="mt-4 text-sm text-gray-600">
+                No reviews yet. Be the first to review!
               </div>
             )}
 
@@ -214,6 +219,9 @@ export default async function ProductDetail({ params }) {
             {/* Add to Cart Component */}
             <AddToCartButton productId={product._id} stock={product.stock} />
 
+            {/* Seller Info */}
+            <SellerInfo accountId={product.accountId} />
+
             {/* Product Specifications */}
             <div className="mt-8 border-t border-gray-200 pt-8">
               <h2 className="mb-4 text-lg font-medium text-gray-900">
@@ -259,36 +267,22 @@ export default async function ProductDetail({ params }) {
         </div>
 
         {/* Reviews Section */}
-        {product.reviews && product.reviews.length > 0 && (
-          <div className="mt-16 border-t border-gray-200 pt-12">
-            <h2 className="mb-8 text-2xl font-bold text-gray-900">
-              Customer Reviews
-            </h2>
+        <div className="mt-16 border-t border-gray-200 pt-12">
+          <h2 className="mb-8 text-2xl font-bold text-gray-900">
+            Customer Reviews
+          </h2>
+          {product.reviews && product.reviews.length > 0 ? (
             <div className="space-y-6">
               {product.reviews.map((review) => (
-                <div
-                  key={review._id}
-                  className="border-b border-gray-200 pb-6 last:border-b-0"
-                >
+                <div key={review._id} className="border-b border-gray-200 pb-6 last:border-b-0">
                   <div className="mb-2 flex items-start justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">
-                        {review.reviewerName}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(review.date).toLocaleDateString()}
-                      </p>
+                      <p className="font-medium text-gray-900">{review.reviewerName}</p>
+                      <p className="text-sm text-gray-500">{new Date(review.date).toLocaleDateString()}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <span
-                          key={i}
-                          className={
-                            i < review.rating
-                              ? "text-lg text-yellow-400"
-                              : "text-lg text-gray-300"
-                          }
-                        >
+                        <span key={i} className={i < review.rating ? "text-lg text-yellow-400" : "text-lg text-gray-300"}>
                           ★
                         </span>
                       ))}
@@ -298,8 +292,10 @@ export default async function ProductDetail({ params }) {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-gray-600">No reviews for this product yet. Be the first to share your thoughts!</p>
+          )}
+        </div>
 
         {/* Related Products Section */}
         {product.relatedProducts && product.relatedProducts.length > 0 && (

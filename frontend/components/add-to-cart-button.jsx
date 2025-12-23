@@ -35,12 +35,6 @@ export default function AddToCartButton({ productId, stock }) {
   };
 
   const handleAddToCart = async () => {
-    const isLoggedIn = document.cookie.split("; ").some((row) => row.startsWith("tokenUser="));
-    if (!isLoggedIn) {
-      router.push("/login");
-      return;
-    }
-
     if (quantity < 1 || quantity > stock) {
       setError(`Please select a valid quantity (1-${stock})`);
       return;
@@ -62,8 +56,10 @@ export default function AddToCartButton({ productId, stock }) {
 
       const data = await response.json();
 
+      console.log(data);
+
       if (!response.ok) {
-        throw new Error(data.message || "Failed to add product to cart");
+        throw new Error(data.error.message || "Failed to add product to cart");
       }
 
       setSuccess(true);
