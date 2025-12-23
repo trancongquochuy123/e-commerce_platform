@@ -50,6 +50,25 @@ router.get("/", controller.index);
  */
 router.get("/create", controller.create);
 
+/**
+ * @swagger
+ * /admin/roles/delete/{id}:
+ *   delete:
+ *     summary: Delete role
+ *     tags:
+ *       - Admin Roles
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Role deleted
+ */
 router.delete("/delete/:id", controller.deleteRole);
 
 // upload.none() cho phép multer xử lý dữ liệu dạng multipart mà không cần có file.

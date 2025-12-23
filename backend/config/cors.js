@@ -10,6 +10,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
     "http://localhost:3001",
     "http://localhost:5173", // Vite
     "http://localhost:4200", // Angular
+    'https://your-app.vercel.app',
+    'https://your-domain.com',
   ];
 
 const corsOptions = {

@@ -5,7 +5,6 @@ const controller = require("../controllers/checkout.controller.js");
 const userMiddleware = require("../middlewares/user.middleware.js");
 const cartMiddleware = require("../middlewares/cart.middleware.js");
 
-router.get("/", controller.index);
 /**
  * @swagger
  * /api/v1/checkout:
@@ -17,19 +16,20 @@ router.get("/", controller.index);
  *       200:
  *         description: Checkout page
  */
-router.get('/', controller.index);
+router.get("/", controller.index);
 
-router.get("/order", userMiddleware.infoUser, controller.getOrder);
-router.get("/boughts", userMiddleware.infoUser, controller.getBought);
-router.post("/order", userMiddleware.infoUser, controller.order);
-
-// Stripe payment confirmation endpoint
-router.post("/confirm-payment", controller.confirmPayment);
 /**
  * @swagger
  * /api/v1/checkout/order:
+ *   get:
+ *     summary: Get user orders
+ *     tags:
+ *       - Checkout
+ *     responses:
+ *       200:
+ *         description: List of user orders
  *   post:
- *     summary: Create order
+ *     summary: Create new order
  *     tags:
  *       - Checkout
  *     requestBody:
@@ -44,17 +44,49 @@ router.post("/confirm-payment", controller.confirmPayment);
  *               shippingAddress:
  *                 type: object
  *     responses:
- *       200:
+ *       201:
  *         description: Order created successfully
  */
-router.post('/order',userMiddleware.infoUser, controller.order);
+router.get("/order", userMiddleware.infoUser, controller.getOrder);
+router.post("/order", userMiddleware.infoUser, controller.order);
 
-router.get("/success/:orderId", controller.success);
+/**
+ * @swagger
+ * /api/v1/checkout/boughts:
+ *   get:
+ *     summary: Get purchased orders
+ *     tags:
+ *       - Checkout
+ *     responses:
+ *       200:
+ *         description: List of purchased orders
+ */
+router.get("/boughts", userMiddleware.infoUser, controller.getBought);
+
+/**
+ * @swagger
+ * /api/v1/checkout/confirm-payment:
+ *   post:
+ *     summary: Confirm Stripe payment
+ *     tags:
+ *       - Checkout
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Payment confirmed
+ */
+router.post("/confirm-payment", controller.confirmPayment);
+
 /**
  * @swagger
  * /api/v1/checkout/success/{orderId}:
  *   get:
- *     summary: Get order success page
+ *     summary: Get order success confirmation page
  *     tags:
  *       - Checkout
  *     parameters:
@@ -68,6 +100,6 @@ router.get("/success/:orderId", controller.success);
  *       200:
  *         description: Order success page
  */
-router.get('/success/:orderId', controller.success);
+router.get("/success/:orderId", controller.success);
 
 module.exports = router;

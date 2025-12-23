@@ -211,6 +211,24 @@ router.get('/logout', userMiddleware.requireAuth, controller.logout);
 router.get('/info', userMiddleware.requireAuth, controller.info);
 router.post('/info', userMiddleware.requireAuth, controller.infoPost);
 
+/**
+ * @swagger
+ * /api/v1/user/shop/{id}:
+ *   get:
+ *     summary: Get shop information by seller ID
+ *     tags:
+ *       - User
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Seller/Shop ID
+ *     responses:
+ *       200:
+ *         description: Shop information
+ */
 router.get("/shop/:id", controller.getShop);
 // Become seller route (requires authentication)
 /**

@@ -66,6 +66,26 @@ router.post('/create',
 
 /**
  * @swagger
+ * /admin/accounts/delete/{id}:
+ *   delete:
+ *     summary: Delete account
+ *     tags:
+ *       - Admin Accounts
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Account deleted
+ */
+
+/**
+ * @swagger
  * /admin/accounts/edit/{id}:
  *   get:
  *     summary: Get account edit form

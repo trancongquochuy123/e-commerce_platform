@@ -9,3 +9,4 @@ module.exports.connect = async () => {
         logger.error('❌ Error connecting to MongoDB:', error);
     }
 }
+

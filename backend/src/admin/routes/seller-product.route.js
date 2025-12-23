@@ -29,16 +29,56 @@ const upload = multer({
 });
 
 /**
- * @route   GET /admin/seller/products
- * @desc    Display seller's products
- * @access  Private (Shop role)
+ * @swagger
+ * /admin/seller/products:
+ *   get:
+ *     summary: Display seller's products
+ *     tags:
+ *       - Admin Seller Products
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of seller's products
  */
 router.get("/", sellerProductController.getMyProducts);
 
 /**
- * @route   GET /admin/seller/products/create
- * @desc    Display create product page
- * @access  Private (Shop role)
+ * @swagger
+ * /admin/seller/products/create:
+ *   get:
+ *     summary: Display create product page
+ *     tags:
+ *       - Admin Seller Products
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Create product form
+ *   post:
+ *     summary: Create new seller product
+ *     tags:
+ *       - Admin Seller Products
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               thumbnail:
+ *                 type: string
+ *                 format: binary
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *     responses:
+ *       201:
+ *         description: Product created successfully
  */
 router.get("/create", sellerProductController.renderCreate);
 
@@ -58,16 +98,72 @@ router.post(
 );
 
 /**
- * @route   GET /admin/seller/products/detail/:id
- * @desc    Display product detail page
- * @access  Private (Shop role)
+ * @swagger
+ * /admin/seller/products/detail/{id}:
+ *   get:
+ *     summary: Display product detail page
+ *     tags:
+ *       - Admin Seller Products
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product details
  */
 router.get("/detail/:id", sellerProductController.getProductById);
 
 /**
- * @route   GET /admin/seller/products/edit/:id
- * @desc    Display edit product page
- * @access  Private (Shop role)
+ * @swagger
+ * /admin/seller/products/edit/{id}:
+ *   get:
+ *     summary: Display edit product page
+ *     tags:
+ *       - Admin Seller Products
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Edit product form
+ *   patch:
+ *     summary: Update seller product
+ *     tags:
+ *       - Admin Seller Products
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               thumbnail:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Product updated successfully
  */
 router.get("/edit/:id", sellerProductController.renderEdit);
 
@@ -84,16 +180,46 @@ router.patch(
 );
 
 /**
- * @route   PATCH /admin/seller/products/change-status/:id
- * @desc    Change product status (active/inactive)
- * @access  Private (Shop role)
+ * @swagger
+ * /admin/seller/products/change-status/{id}:
+ *   patch:
+ *     summary: Change product status (active/inactive)
+ *     tags:
+ *       - Admin Seller Products
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product status changed
  */
 router.patch("/change-status/:id", sellerProductController.changeStatus);
 
 /**
- * @route   DELETE /admin/seller/products/delete/:id
- * @desc    Soft delete product
- * @access  Private (Shop role)
+ * @swagger
+ * /admin/seller/products/delete/{id}:
+ *   delete:
+ *     summary: Soft delete seller product
+ *     tags:
+ *       - Admin Seller Products
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product deleted successfully
  */
 router.delete("/delete/:id", sellerProductController.deleteProduct);
 
