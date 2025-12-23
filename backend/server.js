@@ -13,6 +13,7 @@ const morgan = require('morgan');
 // THƯ VIỆN BỔ SUNG CHO MVC & UTILITIES
 const flash = require('express-flash');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const moment = require('moment');
 const multer = require('multer');
 const favicon = require('serve-favicon');
@@ -93,12 +94,30 @@ app.use(
 // ======================
 // SESSION, FLASH VÀ FAVICON
 // ======================
-app.use(session({
+
+// Cấu hình session store - dùng MongoDB thay vì MemoryStore
+const mongoUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/ecommerce';
+
+const sessionConfig = {
     secret: process.env.SESSION_SECRET || 'huydeptrai',
     resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: 60000 * 24 }
-}));
+    saveUninitialized: false,
+    cookie: { 
+        maxAge: 60000 * 24, // 24 hours
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production' // HTTPS only in production
+    }
+};
+
+// Sử dụng MongoDB store nếu kết nối được, nếu không dùng MemoryStore
+if (process.env.MONGODB_URI) {
+    sessionConfig.store = MongoStore.create({
+        mongoUrl: mongoUrl,
+        touchAfter: 24 * 3600 // Lazy session update - tránh quá nhiều writes
+    });
+}
+
+app.use(session(sessionConfig));
 
 app.use(flash());
 
