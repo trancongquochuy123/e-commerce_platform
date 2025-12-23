@@ -52,12 +52,12 @@ export default function CheckoutForm() {
             ...prev,
             shippingFullName: user.fullName || "",
             shippingEmail: user.email || "",
-            shippingPhone: user.phone || "",
-            shippingAddress: user.address || "",
-            shippingCity: user.city || "",
-            shippingState: user.state || "",
-            shippingZip: user.zip || "",
-            shippingCountry: user.country || "",
+            shippingPhone: user.phone || "0987654321",
+            shippingAddress: user.address || "Hoa Khanh",
+            shippingCity: user.city || "Da Nang",
+            shippingState: user.state || "Lien Chieu",
+            shippingZip: user.zip || "5000",
+            shippingCountry: user.country || "VietNam",
           }));
         }
       } catch (err) {
