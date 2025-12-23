@@ -131,6 +131,7 @@ module.exports.index = async (req, res, next) => {
 
 module.exports.getOrder = async (req, res, next) => {
   try {
+    console.log("lkaskhdkajshdjkashdsjd", req.user)
     const userId = req.user ? req.user._id : req.user.id; // Lấy userId từ req.user nếu đã đăng nhập
 
     if (!userId) {

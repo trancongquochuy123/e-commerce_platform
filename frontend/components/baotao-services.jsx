@@ -48,9 +48,9 @@ export default async function BaotaoService() {
                   <i className="icon-cate--xP_I0ts1 tb-ifont"></i>
                   <a
                     className="cate-content-href--HI8wwRts"
-                    href="/categories/computers"
+                    href="/categories/laptops"
                   >
-                    Computers
+                    Laptops
                   </a>
                 </div>
               </li>
@@ -317,28 +317,19 @@ export default async function BaotaoService() {
                 </a>
               </div>
               <div className="mytao-content">
-                <a
-                  href="https://favorite.taobao.com/list_bought_shops_n.htm"
-                  className="mytao-collectitem"
-                >
+                <a href="/orders/bought" className="mytao-collectitem">
                   <span className="tb-ifont mytao-icon"></span>
                   <p>Bought</p>
                 </a>
               </div>
               <div className="mytao-content">
-                <a
-                  href="https://i.taobao.com/my_itaobao/subscription"
-                  className="mytao-collectitem"
-                >
+                <a href="#" className="mytao-collectitem">
                   <span className="tb-ifont mytao-icon"></span>
                   <p>Followings</p>
                 </a>
               </div>
               <div className="mytao-content">
-                <a
-                  href="https://i.taobao.com/my_itaobao/itao-tool/footMark"
-                  className="mytao-collectitem"
-                >
+                <a href="/orders" className="mytao-collectitem">
                   <span className="tb-ifont mytao-icon"></span>
                   <p>Orders</p>
                 </a>

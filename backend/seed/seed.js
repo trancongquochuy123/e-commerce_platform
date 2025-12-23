@@ -429,7 +429,7 @@ const seedAccounts = async (roles, count = 5) => {
 const seedProductCategories = async () => {
   console.log("🌱 Seeding Product Categories...");
   const categoryNames = [
-    "Computers",
+    "Laptops",
     "Phones",
     "Furniture",
     "Kitchen",

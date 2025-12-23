@@ -5,7 +5,7 @@ export function middleware(request) {
   const tokenUser = request.cookies.get("tokenUser")?.value;
 
   // Define protected routes
-  const protectedRoutes = ["/cart", "/checkout"];
+  const protectedRoutes = ["/cart", "/checkout", "/orders"];
   const authRoutes = ["/login", "/signup"];
 
   // Check if current path is a protected route
@@ -28,5 +28,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/cart", "/login", "/signup", "/checkout"],
+  matcher: ["/cart", "/login", "/signup", "/checkout", "/orders"],
 };
