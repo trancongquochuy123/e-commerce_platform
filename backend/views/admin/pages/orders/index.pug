@@ -1,0 +1,155 @@
+extends ../../layout/default.pug
+include ../../mixins/filter-status.pug
+include ../../mixins/search.pug
+include ../../mixins/pagination.pug
+include ../../mixins/alert.pug
+include ../../mixins/sort.pug
+
+block main 
+    if (role.permissions.includes('orders_view'))
+
+        +alert-success(5000)
+
+        //- Container chính với padding rộng rãi hơn
+        .container-fluid.px-4.py-4
+            //- 1. Header & Actions
+            .d-flex.justify-content-between.align-items-center.mb-4
+                div
+                    h1.h3.mb-1.text-gray-800 Danh sách đơn hàng
+                    p.text-muted.small Quản lý và theo dõi trạng thái đơn hàng
+
+            //- 2. Control Panel (Material Card)
+            .card.border-0.shadow-sm.rounded-4.mb-4
+                .card-body.p-4
+                    .row.g-4
+                        //- Cột 1: Tìm kiếm (Giả lập Material Search Bar)
+                        .col-md-6
+                            .form-group
+                                label.form-label.text-muted.small.fw-bold.text-uppercase(style="letter-spacing: 0.5px;") Tìm kiếm khách hàng
+                                // Box tìm kiếm nên có background nhẹ hoặc shadow
+                                .input-group.input-group-lg
+                                    +search(keyword)
+
+                        //- Cột 2: Lọc theo trạng thái (Floating Label)
+                        .col-md-6
+                            form(method="GET" action=`/${prefixAdmin}/orders`)
+                                input(type="hidden" name="keyword" value=keyword)
+                                .form-floating
+                                    select.form-select.border-0.bg-light#statusSelect(name="status" onchange="this.form.submit()" style="border-radius: 12px;")
+                                        option(value="") Tất cả trạng thái
+                                        option(value="pending" selected=filterStatus.pending) Chờ xử lý
+                                        option(value="processing" selected=filterStatus.processing) Đang xử lý
+                                        option(value="shipped" selected=filterStatus.shipped) Đã gửi
+                                        option(value="delivered" selected=filterStatus.delivered) Đã giao
+                                        option(value="cancelled" selected=filterStatus.cancelled) Đã hủy
+                                    label(for="statusSelect") Lọc theo trạng thái
+
+            //- 3. Data Table (Material Data Table style)
+            .card.border-0.shadow.rounded-4.overflow-hidden
+                .table-responsive
+                    table.table.table-hover.align-middle.mb-0
+                        thead.bg-light
+                            tr
+                                th.py-3.ps-4.text-uppercase.text-secondary.small.fw-bold(style="letter-spacing: 1px;") Mã đơn
+                                th.py-3.text-uppercase.text-secondary.small.fw-bold(style="letter-spacing: 1px;") Khách hàng
+                                th.py-3.text-center.text-uppercase.text-secondary.small.fw-bold(style="letter-spacing: 1px;") SL
+                                th.py-3.text-uppercase.text-secondary.small.fw-bold(style="letter-spacing: 1px;") Trạng thái
+                                th.py-3.text-uppercase.text-secondary.small.fw-bold(style="letter-spacing: 1px;") Tổng tiền
+                                th.py-3.text-uppercase.text-secondary.small.fw-bold(style="letter-spacing: 1px;") Ngày đặt
+                                th.py-3.text-end.pe-4.text-uppercase.text-secondary.small.fw-bold(style="letter-spacing: 1px;") Hành động
+                        tbody
+                            if orders.length
+                                each order in orders
+                                    tr.border-bottom
+                                        td.ps-4
+                                            a(href=`/${prefixAdmin}/orders/detail/${order._id}` class="text-primary fw-bold text-decoration-none")
+                                                | ##{order._id.toString().slice(-8).toUpperCase()}
+                                        td
+                                            div.d-flex.flex-column
+                                                span.fw-medium.text-dark #{order.userInfo.fullName}
+                                                small.text-muted #{order.userInfo.phone}
+                                        td.text-center
+                                            span.badge.bg-light.text-dark.rounded-pill.border #{order.products.length}
+                                        td
+                                            //- Material Chips Style
+                                            case order.status
+                                                when 'pending'
+                                                    //- Thay text-warning-emphasis thành text-dark
+                                                    span.badge.rounded-pill.bg-warning.bg-opacity-25.text-dark.px-3.py-2
+                                                        i.bi.bi-hourglass-split.me-1
+                                                        | Chờ xử lý
+                                                when 'processing'
+                                                    //- Thay text-primary thành text-dark
+                                                    span.badge.rounded-pill.bg-primary.bg-opacity-10.text-dark.px-3.py-2
+                                                        i.bi.bi-gear-fill.me-1
+                                                        | Đang xử lý
+                                                when 'shipped'
+                                                    //- Thay text-info thành text-dark
+                                                    span.badge.rounded-pill.bg-info.bg-opacity-10.text-dark.px-3.py-2
+                                                        i.bi.bi-truck.me-1
+                                                        | Đã gửi
+                                                when 'delivered'
+                                                    //- Thay text-success thành text-dark
+                                                    span.badge.rounded-pill.bg-success.bg-opacity-10.text-dark.px-3.py-2
+                                                        i.bi.bi-check-circle-fill.me-1
+                                                        | Đã giao
+                                                when 'cancelled'
+                                                    //- Thay text-danger thành text-dark
+                                                    span.badge.rounded-pill.bg-danger.bg-opacity-10.text-dark.px-3.py-2
+                                                        i.bi.bi-x-circle-fill.me-1
+                                                        | Đã hủy
+                                        td
+                                            - let total = 0
+                                            each product in order.products
+                                                - let price = product.price
+                                                - let discount = (price * product.discountPercentage) / 100
+                                                - let finalPrice = price - discount
+                                                - total += finalPrice * product.quantity
+                                            span.fw-bold.text-success
+                                                = total.toLocaleString('vi-VN') + ' ₫'
+                                        td
+                                            span.text-muted
+                                                = new Date(order.createdAt).toLocaleDateString('vi-VN')
+                                        td.text-end.pe-4
+                                            .d-flex.gap-2.justify-content-end
+                                                //- Icon Button Style (Circle)
+                                                a.btn.btn-light.rounded-circle.shadow-sm.d-flex.align-items-center.justify-content-center(
+                                                    href=`/${prefixAdmin}/orders/detail/${order._id}` 
+                                                    title="Xem chi tiết"
+                                                    style="width: 32px; height: 32px;"
+                                                )
+                                                    i.bi.bi-eye-fill.text-secondary
+
+                                                if order.status != 'delivered' && order.status != 'cancelled'
+                                                    form(method="POST" action=`/${prefixAdmin}/orders/change-status/${order.status === 'pending' ? 'processing' : order.status === 'processing' ? 'shipped' : 'delivered'}/${order._id}`)
+                                                        button.btn.btn-light.rounded-circle.shadow-sm.d-flex.align-items-center.justify-content-center.text-success(
+                                                            type="submit" 
+                                                            title="Cập nhật trạng thái kế tiếp"
+                                                            style="width: 32px; height: 32px;"
+                                                        )
+                                                            i.bi.bi-arrow-right
+
+                                                a.btn.btn-light.rounded-circle.shadow-sm.d-flex.align-items-center.justify-content-center.text-danger(
+                                                    href=`/${prefixAdmin}/orders/delete/${order._id}` 
+                                                    onclick="return confirm('Bạn có chắc chắn muốn xóa?')" 
+                                                    title="Xóa"
+                                                    style="width: 32px; height: 32px;"
+                                                )
+                                                    i.bi.bi-trash-fill
+                            else
+                                tr
+                                    td(colspan="7").text-center.py-5
+                                        .d-flex.flex-column.align-items-center
+                                            i.bi.bi-inbox.display-1.text-muted.mb-3
+                                            h5.text-muted Không có đơn hàng nào
+
+            //- 4. Pagination
+            if pagination.totalPage > 1
+                .mt-4.d-flex.justify-content-end
+                    +pagination(pagination)
+
+    else
+        .container-fluid.px-4.py-4
+            .alert.alert-warning.d-flex.align-items-center.shadow-sm.rounded-3(role="alert")
+                i.bi.bi-exclamation-triangle-fill.me-2
+                div Bạn không có quyền xem danh sách đơn hàng

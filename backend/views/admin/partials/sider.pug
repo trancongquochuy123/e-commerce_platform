@@ -15,17 +15,23 @@
                         i.menu-icon.bi.bi-box-seam
                         |  Danh mục sản phẩm
 
-            if role.permissions.includes('products_view') 
-                li
-                    a(href=`/${prefixAdmin}/seller/products`)
-                        i.menu-icon.bi.bi-box-seam
-                        |  Quản lý sản phẩm
+            //- if role.permissions.includes('products_view') 
+            //-     li
+            //-         a(href=`/${prefixAdmin}/seller/products`)
+            //-             i.menu-icon.bi.bi-box-seam
+            //-             |  Quản lý sản phẩm
 
             if role.permissions.includes('categories_view') 
                 li
                     a(href=`/${prefixAdmin}/products-category`)
                         i.menu-icon.bi.bi-tags
                         |  Phân loại sản phẩm
+
+            if role.permissions.includes('orders_view') 
+                li
+                    a(href=`/${prefixAdmin}/orders`)
+                        i.menu-icon.bi.bi-cart-check
+                        |  Quản lý đơn hàng
 
             if role.permissions.includes('roles_view')
                 li

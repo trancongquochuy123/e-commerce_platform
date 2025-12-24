@@ -4,6 +4,7 @@ const router = express.Router();
 const dashboardRoutes = require("./dashboard.route");
 const productRoutes = require("./product.route");
 const productCategoryRoutes = require("./product-category.route");
+const orderRoutes = require("./order.route");
 const roleRoutes = require("./role.route");
 const accountRoutes = require("./account.route");
 const authRoutes = require("./auth.route");
@@ -24,6 +25,8 @@ module.exports = (app) => {
     authMiddleware.requireAuth,
     productCategoryRoutes
   );
+
+  app.use("/admin/orders", authMiddleware.requireAuth, orderRoutes);
 
   app.use("/admin/roles", authMiddleware.requireAuth, roleRoutes);
 

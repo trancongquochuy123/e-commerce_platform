@@ -1,0 +1,202 @@
+extends ../../layout/default.pug
+include ../../mixins/alert.pug
+
+block main 
+    if (role.permissions.includes('orders_view'))
+        +alert-success(5000)
+
+        //- Container
+        .container-fluid.px-4.py-4
+            //- 1. Header Navigation
+            .d-flex.align-items-center.gap-3.mb-4
+                a.btn.btn-light.btn-icon.rounded-circle.shadow-sm(
+                    href=`/${prefixAdmin}/orders` 
+                    style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"
+                )
+                    i.bi.bi-arrow-left
+                div
+                    h1.h4.mb-0.fw-bold Chi tiết đơn hàng ##{order._id.toString().slice(-6).toUpperCase()}
+                    span.text-muted.small= new Date(order.createdAt).toLocaleString('vi-VN')
+
+            .row.g-4
+                //- LEFT COLUMN (Thông tin chính & Sản phẩm)
+                .col-lg-8
+                    //- 1. Info Cards Grid
+                    .row.g-4.mb-4
+                        //- Customer Info
+                        .col-md-6
+                            .card.border-0.shadow-sm.rounded-4.h-100
+                                .card-body.p-4
+                                    .d-flex.align-items-center.mb-3
+                                        .icon-box.bg-primary.bg-opacity-10.text-dark.rounded-circle.p-2.me-3
+                                            i.bi.bi-person-fill.fs-5
+                                        h6.card-title.fw-bold.mb-0 Khách hàng
+                                    
+                                    .vstack.gap-3
+                                        div
+                                            small.text-muted.d-block.mb-1 Họ và tên
+                                            span.fw-medium= order.userInfo.fullName
+                                        div
+                                            small.text-muted.d-block.mb-1 Số điện thoại
+                                            span.fw-medium= order.userInfo.phone
+                                        div
+                                            small.text-muted.d-block.mb-1 Địa chỉ
+                                            span.fw-medium= order.userInfo.address
+
+                        //- Payment & Note Info
+                        .col-md-6
+                            .card.border-0.shadow-sm.rounded-4.h-100
+                                .card-body.p-4
+                                    .d-flex.align-items-center.mb-3
+                                        .icon-box.bg-info.bg-opacity-10.text-dark.rounded-circle.p-2.me-3
+                                            i.bi.bi-credit-card-fill.fs-5
+                                        h6.card-title.fw-bold.mb-0 Thanh toán & Ghi chú
+                                    
+                                    .vstack.gap-3
+                                        div
+                                            small.text-muted.d-block.mb-1 Phương thức
+                                            if order.method === 'cod'
+                                                span.badge.bg-light.text-dark.border Thanh toán khi nhận (COD)
+                                            else
+                                                span.badge.bg-primary.bg-opacity-10.text-dark Stripe
+                                        div
+                                            small.text-muted.d-block.mb-1 Trạng thái thanh toán
+                                            if order.isPaid
+                                                span.badge.bg-success.bg-opacity-10.text-dark Đã thanh toán
+                                            else
+                                                span.badge.bg-warning.bg-opacity-10.text-dark-emphasis Chưa thanh toán
+                                        if order.userInfo.note
+                                            div
+                                                small.text-muted.d-block.mb-1 Ghi chú từ khách
+                                                span.fst-italic.text-secondary= order.userInfo.note
+
+                    //- 2. Product List
+                    .card.border-0.shadow-sm.rounded-4
+                        .card-header.bg-white.border-0.pt-4.px-4
+                            .d-flex.align-items-center
+                                .icon-box.bg-success.bg-opacity-10.text-dark.rounded-circle.p-2.me-3
+                                    i.bi.bi-box-seam-fill.fs-5
+                                h6.fw-bold.mb-0 Danh sách sản phẩm
+                        .card-body.p-0
+                            .table-responsive
+                                table.table.table-hover.align-middle.mb-0
+                                    thead.bg-light
+                                        tr
+                                            th.ps-4.py-3.text-secondary.small.fw-bold Sản phẩm
+                                            th.py-3.text-secondary.small.fw-bold.text-end Đơn giá
+                                            th.py-3.text-secondary.small.fw-bold.text-center Số lượng
+                                            th.pe-4.py-3.text-secondary.small.fw-bold.text-end Tổng tiền
+                                    tbody
+                                        - let total = 0
+                                        each product in order.products
+                                            - let price = product.price
+                                            - let discount = (price * product.discountPercentage) / 100
+                                            - let finalPrice = price - discount
+                                            - let itemTotal = finalPrice * product.quantity
+                                            - total += itemTotal
+                                            tr
+                                                td.ps-4.py-3
+                                                    div
+                                                        span.fw-medium.text-dark= product.product_id.title
+                                                        br
+                                                        small.text-muted= product.product_id.slug
+                                                td.text-end
+                                                    if product.discountPercentage > 0
+                                                        div
+                                                            small.text-decoration-line-through.text-muted.me-2= price.toLocaleString('vi-VN') + '₫'
+                                                            span.fw-bold= finalPrice.toLocaleString('vi-VN') + '₫'
+                                                    else
+                                                        span.fw-bold= price.toLocaleString('vi-VN') + '₫'
+                                                td.text-center
+                                                    span.badge.bg-light.text-dark.border.px-3= product.quantity
+                                                td.pe-4.text-end
+                                                    span.fw-bold.text-dark= itemTotal.toLocaleString('vi-VN') + '₫'
+
+                //- RIGHT COLUMN (Trạng thái & Tổng kết)
+                .col-lg-4
+                    //- 1. Current Status
+                    .card.border-0.shadow-sm.rounded-4.mb-4
+                        .card-body.p-4.text-center
+                            h6.text-muted.small.text-uppercase.fw-bold.mb-3 Trạng thái đơn hàng
+                            
+                            case order.status
+                                when 'pending'
+                                    .d-inline-flex.flex-column.align-items-center.text-dark
+                                        i.bi.bi-hourglass-split.display-4.mb-2
+                                        span.badge.rounded-pill.bg-warning.bg-opacity-25.text-dark-emphasis.px-4.py-2.fs-6 Chờ xử lý
+                                when 'processing'
+                                    .d-inline-flex.flex-column.align-items-center.text-dark
+                                        i.bi.bi-gear-wide-connected.display-4.mb-2
+                                        span.badge.rounded-pill.bg-primary.bg-opacity-25.text-dark.px-4.py-2.fs-6 Đang xử lý
+                                when 'shipped'
+                                    .d-inline-flex.flex-column.align-items-center.text-dark
+                                        i.bi.bi-truck.display-4.mb-2
+                                        span.badge.rounded-pill.bg-info.bg-opacity-25.text-dark.px-4.py-2.fs-6 Đã gửi hàng
+                                when 'delivered'
+                                    .d-inline-flex.flex-column.align-items-center.text-dark
+                                        i.bi.bi-check-circle-fill.display-4.mb-2
+                                        span.badge.rounded-pill.bg-success.bg-opacity-25.text-dark.px-4.py-2.fs-6 Đã giao hàng
+                                when 'cancelled'
+                                    .d-inline-flex.flex-column.align-items-center.text-dark
+                                        i.bi.bi-x-circle-fill.display-4.mb-2
+                                        span.badge.rounded-pill.bg-danger.bg-opacity-25.text-dark.px-4.py-2.fs-6 Đã hủy
+
+                    //- 2. Actions (Process Flow)
+                    if order.status != 'delivered' && order.status != 'cancelled'
+                        .card.border-0.shadow-sm.rounded-4.mb-4
+                            .card-header.bg-white.border-0.pt-4.px-4
+                                h6.fw-bold.mb-0 Thao tác xử lý
+                            .card-body.p-4
+                                .d-grid.gap-2
+                                    if order.status === 'pending'
+                                        form(method="POST" action=`/${prefixAdmin}/orders/change-status/processing/${order._id}`)
+                                            button.btn.btn-primary.w-100.py-2.rounded-pill(type="submit")
+                                                i.bi.bi-arrow-right-circle.me-2
+                                                | Duyệt & Xử lý đơn
+                                    
+                                    if order.status === 'processing'
+                                        form(method="POST" action=`/${prefixAdmin}/orders/change-status/shipped/${order._id}`)
+                                            button.btn.btn-info.text-dark.w-100.py-2.rounded-pill(type="submit")
+                                                i.bi.bi-truck.me-2
+                                                | Xác nhận Gửi hàng
+                                    
+                                    if order.status === 'shipped'
+                                        form(method="POST" action=`/${prefixAdmin}/orders/change-status/delivered/${order._id}`)
+                                            button.btn.btn-success.w-100.py-2.rounded-pill(type="submit")
+                                                i.bi.bi-check-lg.me-2
+                                                | Xác nhận Đã giao
+                                    
+                                    hr.text-muted.my-2
+
+                                    form(method="POST" action=`/${prefixAdmin}/orders/change-status/cancelled/${order._id}`)
+                                        button.btn.btn-outline-danger.w-100.py-2.rounded-pill(type="submit")
+                                            i.bi.bi-x-lg.me-2
+                                            | Hủy đơn hàng
+
+                    //- 3. Order Summary
+                    .card.border-0.shadow-sm.rounded-4
+                        .card-header.bg-white.border-0.pt-4.px-4
+                            h6.fw-bold.mb-0 Tóm tắt chi phí
+                        .card-body.p-4
+                            .d-flex.justify-content-between.mb-2
+                                span.text-muted Tạm tính
+                                span.fw-medium= total.toLocaleString('vi-VN') + ' ₫'
+                            
+                            .d-flex.justify-content-between.mb-2
+                                span.text-muted Phí vận chuyển
+                                span.text-muted Miễn phí
+                            
+                            .d-flex.justify-content-between.mb-4
+                                span.text-muted Giảm giá
+                                span.text-muted 0 ₫
+
+                            .border-top.border-dashed.pt-3
+                                .d-flex.justify-content-between.align-items-center
+                                    span.fw-bold.text-dark Tổng cộng
+                                    span.fs-4.fw-bold.text-dark= total.toLocaleString('vi-VN') + ' ₫'
+
+    else
+        .container-fluid.p-4
+            .alert.alert-warning.shadow-sm.rounded-4.border-0
+                i.bi.bi-exclamation-triangle-fill.me-2
+                | Bạn không có quyền xem chi tiết đơn hàng
